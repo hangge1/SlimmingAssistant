@@ -33,15 +33,6 @@ export type DashboardMetricCard = {
   tone: "health" | "motion" | "warning";
 };
 
-export type DashboardTrendCard = {
-  title: string;
-  periodLabel: string;
-  value: string;
-  unit: string;
-  description: string;
-  tone: "health" | "motion" | "warning";
-};
-
 export type DashboardProgressCard = {
   title: string;
   status: "未设置" | "进行中" | "已达成" | "落后";
@@ -72,11 +63,18 @@ export type DashboardChartMetric = {
   points: DashboardChartPoint[];
 };
 
+export type DashboardChartPeriodOption = {
+  label: string;
+  days: number;
+  startLocalDate: string;
+  endLocalDate: string;
+  metrics: DashboardChartMetric[];
+};
+
 export type DashboardChartPanel = {
   title: string;
-  periodLabel: string;
   description: string;
-  metrics: DashboardChartMetric[];
+  periodOptions: DashboardChartPeriodOption[];
 };
 
 function formatNumber(value: number) {
@@ -217,8 +215,12 @@ export function createDashboardSummary({
 
   const healthValue = latestHealth?.weightKg == null ? "暂无数据" : formatNumber(latestHealth.weightKg);
   const healthUnit = latestHealth?.weightKg == null ? "" : "公斤";
+  const latestBmi =
+    heightCm && heightCm > 0 && latestHealth?.weightKg != null
+      ? latestHealth.weightKg / ((heightCm / 100) * (heightCm / 100))
+      : null;
   const healthDescription = latestHealth
-    ? `最近记录：${latestHealth.localDate}，继续补齐围度和体脂率可以让摘要更完整。`
+    ? `最近记录：${latestHealth.localDate}${latestBmi == null ? "" : `，BMI ${formatNumber(latestBmi)}`}，继续补齐围度和体脂率可以让摘要更完整。`
     : "记录体重、围度和体脂率后显示健康摘要。";
 
   const motionValue = todayRuns.length > 0 ? formatNumber(todayRunDistance) : "暂无跑量";
@@ -228,8 +230,50 @@ export function createDashboardSummary({
       ? `今天已记录 ${todayRuns.length} 次跑步。`
       : "添加跑步记录后显示今天跑量和次数。";
 
+  const recentGoalRuns = filterByRecentDays(allRuns, todayLocalDate, 7);
+  const recentGoalRunCount = recentGoalRuns.length;
+  const recentGoalRunDistance = recentGoalRuns.reduce((sum, record) => sum + record.distanceKm, 0);
+  const healthGoalSummary =
+    healthGoal?.targetWeightKg == null
+      ? null
+      : latestHealth?.weightKg == null
+        ? {
+            value: "待记录",
+            unit: "",
+            description: `健康目标：目标 ${formatNumber(healthGoal.targetWeightKg)} 公斤，需要先记录体重。`,
+          }
+        : latestHealth.weightKg <= healthGoal.targetWeightKg
+          ? {
+              value: "健康已达成",
+              unit: "",
+              description: `健康目标：当前 ${formatNumber(latestHealth.weightKg)} 公斤，目标 ${formatNumber(healthGoal.targetWeightKg)} 公斤。`,
+            }
+          : {
+              value: `还差 ${formatNumber(latestHealth.weightKg - healthGoal.targetWeightKg)}`,
+              unit: "公斤",
+              description: `健康目标：当前 ${formatNumber(latestHealth.weightKg)} 公斤，目标 ${formatNumber(healthGoal.targetWeightKg)} 公斤。`,
+            };
+  const runRemainingCount = runGoal?.weeklyRunCount == null ? 0 : Math.max(0, runGoal.weeklyRunCount - recentGoalRunCount);
+  const runRemainingDistance =
+    runGoal?.weeklyDistanceKm == null ? 0 : Math.max(0, runGoal.weeklyDistanceKm - recentGoalRunDistance);
+  const runGoalSummary =
+    runGoal?.weeklyRunCount == null || runGoal.weeklyDistanceKm == null
+      ? null
+      : {
+          value:
+            runRemainingCount === 0 && runRemainingDistance === 0
+              ? "跑步已达成"
+              : runRemainingCount > 0
+                ? `还差 ${runRemainingCount}`
+                : `还差 ${formatNumber(runRemainingDistance)}`,
+          unit: runRemainingCount === 0 && runRemainingDistance === 0 ? "" : runRemainingCount > 0 ? "次" : "公里",
+          description: `跑步目标：最近 7 天还差 ${runRemainingCount} 次 / ${formatNumber(runRemainingDistance)} 公里。`,
+        };
+  const targetValue =
+    healthGoalSummary?.value ?? runGoalSummary?.value ?? "未设置";
+  const targetUnit = healthGoalSummary?.unit ?? runGoalSummary?.unit ?? "";
   const targetDescription = hasAnyGoal
-    ? "健康目标或跑步目标已设置，后续会在这里展示差距。"
+    ? [healthGoalSummary?.description, runGoalSummary?.description].filter(Boolean).join(" ")
     : "设置健康目标和跑步目标后显示目标摘要。";
 
   const metricCards: DashboardMetricCard[] = [
@@ -249,270 +293,183 @@ export function createDashboardSummary({
     },
     {
       title: "目标摘要",
-      value: hasAnyGoal ? "已设置" : "未设置",
-      unit: "",
+      value: targetValue,
+      unit: targetUnit,
       description: targetDescription,
       tone: "warning",
     },
   ];
 
-  const buildHealthTrendCard = (days: number): DashboardTrendCard => {
-    const periodRecords = filterByRecentDays(latestHealthRecords, todayLocalDate, days);
-    const earliest = periodRecords[0];
-    const latest = periodRecords[periodRecords.length - 1];
-    const periodLabel = `最近 ${days} 天`;
+  const chartRangeOptions = [
+    { label: "最近 7 天", days: 7 },
+    { label: "最近 1 个月", days: 30 },
+    { label: "最近半年", days: 183 },
+    { label: "最近 1 年", days: 365 },
+  ].map((range) => ({
+    ...range,
+    startLocalDate: addDays(todayLocalDate, 1 - range.days),
+    endLocalDate: todayLocalDate,
+  }));
 
-    if (!earliest || !latest || earliest.id === latest.id || earliest.weightKg == null || latest.weightKg == null) {
-      return {
-        title: "健康趋势",
-        periodLabel,
-        value: "数据不足",
-        unit: "",
-        description: `${periodLabel}至少需要两条包含体重的健康记录才能判断变化。`,
-        tone: "health",
-      };
-    }
-
-    const descriptions = [`体重变化 ${formatSignedNumber(latest.weightKg - earliest.weightKg)} 公斤`];
-
-    if (earliest.waistCm != null && latest.waistCm != null) {
-      descriptions.push(`腰围变化 ${formatSignedNumber(latest.waistCm - earliest.waistCm)} 厘米`);
-    }
-
-    if (earliest.hipCm != null && latest.hipCm != null) {
-      descriptions.push(`臀围变化 ${formatSignedNumber(latest.hipCm - earliest.hipCm)} 厘米`);
-    }
-
-    if (earliest.bodyFatPercentage != null && latest.bodyFatPercentage != null) {
-      descriptions.push(`体脂率变化 ${formatSignedNumber(latest.bodyFatPercentage - earliest.bodyFatPercentage)}%`);
-    }
-
-    return {
-      title: "健康趋势",
-      periodLabel,
-      value: formatSignedNumber(latest.weightKg - earliest.weightKg),
-      unit: "公斤",
-      description: `${periodLabel}${descriptions.join("，")}。`,
-      tone: "health",
-    };
-  };
-
-  const buildRunTrendCard = (days: number): DashboardTrendCard => {
-    const periodRuns = filterByRecentDays(allRuns, todayLocalDate, days);
-    const periodLabel = `最近 ${days} 天`;
-
-    if (periodRuns.length === 0) {
-      return {
-        title: "跑步趋势",
-        periodLabel,
-        value: "暂无跑量",
-        unit: "",
-        description: `${periodLabel}还没有跑步记录。`,
-        tone: "motion",
-      };
-    }
-
-    const distance = periodRuns.reduce((sum, record) => sum + record.distanceKm, 0);
-    const paceRecords = periodRuns.filter((record) => record.paceSecondsPerKm != null);
-    const averagePaceSeconds =
-      paceRecords.length > 0
-        ? paceRecords.reduce((sum, record) => sum + (record.paceSecondsPerKm ?? 0), 0) / paceRecords.length
-        : null;
-    const paceText =
-      averagePaceSeconds == null ? "" : `，平均配速 ${formatNumber(averagePaceSeconds / 60)} 分钟/公里`;
-
-    return {
-      title: "跑步趋势",
-      periodLabel,
-      value: formatNumber(distance),
-      unit: "公里",
-      description: `${periodLabel}记录 ${periodRuns.length} 次跑步${paceText}。`,
-      tone: "motion",
-    };
-  };
-
-  const buildBmiCard = (): DashboardTrendCard => {
-    if (!heightCm || heightCm <= 0 || latestHealth?.weightKg == null) {
-      return {
-        title: "BMI",
-        periodLabel: "最近记录",
-        value: "未计算",
-        unit: "",
-        description: "需要先在设置中填写身高并记录体重，BMI 才能计算。",
-        tone: "warning",
-      };
-    }
-
-    const heightMeters = heightCm / 100;
-    const bmi = latestHealth.weightKg / (heightMeters * heightMeters);
-
-    return {
-      title: "BMI",
-      periodLabel: "最近记录",
-      value: formatNumber(bmi),
-      unit: "",
-      description: `按身高 ${heightCm} 厘米和最近体重 ${formatNumber(latestHealth.weightKg)} 公斤计算。`,
-      tone: "warning",
-    };
-  };
-
-  const trendCards: DashboardTrendCard[] = [
-    buildHealthTrendCard(7),
-    buildHealthTrendCard(30),
-    buildRunTrendCard(7),
-    buildRunTrendCard(30),
-    buildBmiCard(),
-  ];
-
-  const recentHealthRecords = filterByRecentDays(latestHealthRecords, todayLocalDate, 30);
-  const healthChartMetrics: DashboardChartMetric[] = [
-    buildVisualMetric(
-      "体重",
-      "公斤",
-      recentHealthRecords
-        .filter((record) => record.weightKg != null)
-        .map((record) => ({ localDate: record.localDate, value: record.weightKg ?? 0 })),
-      "health",
-    ),
-    buildVisualMetric(
-      "腰围",
-      "厘米",
-      recentHealthRecords
-        .filter((record) => record.waistCm != null)
-        .map((record) => ({ localDate: record.localDate, value: record.waistCm ?? 0 })),
-      "health",
-    ),
-    buildVisualMetric(
-      "体脂率",
-      "%",
-      recentHealthRecords
-        .filter((record) => record.bodyFatPercentage != null)
-        .map((record) => ({ localDate: record.localDate, value: record.bodyFatPercentage ?? 0 })),
-      "warning",
-    ),
-  ];
-
-  if (heightCm && heightCm > 0) {
-    const heightMeters = heightCm / 100;
-    healthChartMetrics.push(
+  const buildHealthChartMetrics = (days: number): DashboardChartMetric[] => {
+    const periodHealthRecords = filterByRecentDays(latestHealthRecords, todayLocalDate, days);
+    const metrics: DashboardChartMetric[] = [
       buildVisualMetric(
-        "BMI",
-        "",
-        recentHealthRecords
+        "体重",
+        "公斤",
+        periodHealthRecords
           .filter((record) => record.weightKg != null)
-          .map((record) => ({
-            localDate: record.localDate,
-            value: (record.weightKg ?? 0) / (heightMeters * heightMeters),
-          })),
+          .map((record) => ({ localDate: record.localDate, value: record.weightKg ?? 0 })),
+        "health",
+      ),
+      buildVisualMetric(
+        "腰围",
+        "厘米",
+        periodHealthRecords
+          .filter((record) => record.waistCm != null)
+          .map((record) => ({ localDate: record.localDate, value: record.waistCm ?? 0 })),
+        "health",
+      ),
+      buildVisualMetric(
+        "体脂率",
+        "%",
+        periodHealthRecords
+          .filter((record) => record.bodyFatPercentage != null)
+          .map((record) => ({ localDate: record.localDate, value: record.bodyFatPercentage ?? 0 })),
         "warning",
       ),
-    );
-  }
+    ];
 
-  const recentDateLabels = getRecentDateLabels(todayLocalDate, 30);
-  const recentRuns = filterByRecentDays(allRuns, todayLocalDate, 30);
-  const runsByDate = new Map<
-    string,
-    {
-      distanceKm: number;
-      count: number;
-      paceSecondsTotal: number;
-      paceRecordCount: number;
-      heartRateTotal: number;
-      heartRateRecordCount: number;
-    }
-  >();
-
-  for (const localDate of recentDateLabels) {
-    runsByDate.set(localDate, {
-      distanceKm: 0,
-      count: 0,
-      paceSecondsTotal: 0,
-      paceRecordCount: 0,
-      heartRateTotal: 0,
-      heartRateRecordCount: 0,
-    });
-  }
-
-  for (const run of recentRuns) {
-    const day = runsByDate.get(run.localDate);
-    if (!day) {
-      continue;
+    if (heightCm && heightCm > 0) {
+      const heightMeters = heightCm / 100;
+      metrics.push(
+        buildVisualMetric(
+          "BMI",
+          "",
+          periodHealthRecords
+            .filter((record) => record.weightKg != null)
+            .map((record) => ({
+              localDate: record.localDate,
+              value: (record.weightKg ?? 0) / (heightMeters * heightMeters),
+            })),
+          "warning",
+        ),
+      );
     }
 
-    day.distanceKm += run.distanceKm;
-    day.count += 1;
+    return metrics;
+  };
 
-    if (run.paceSecondsPerKm != null) {
-      day.paceSecondsTotal += run.paceSecondsPerKm;
-      day.paceRecordCount += 1;
+  const buildRunChartMetrics = (days: number): DashboardChartMetric[] => {
+    const periodDateLabels = getRecentDateLabels(todayLocalDate, days);
+    const periodRuns = filterByRecentDays(allRuns, todayLocalDate, days);
+    const periodRunsByDate = new Map<
+      string,
+      {
+        distanceKm: number;
+        count: number;
+        paceSecondsTotal: number;
+        paceRecordCount: number;
+        heartRateTotal: number;
+        heartRateRecordCount: number;
+      }
+    >();
+
+    for (const localDate of periodDateLabels) {
+      periodRunsByDate.set(localDate, {
+        distanceKm: 0,
+        count: 0,
+        paceSecondsTotal: 0,
+        paceRecordCount: 0,
+        heartRateTotal: 0,
+        heartRateRecordCount: 0,
+      });
     }
 
-    if (run.averageHeartRateBpm != null) {
-      day.heartRateTotal += run.averageHeartRateBpm;
-      day.heartRateRecordCount += 1;
-    }
-  }
+    for (const run of periodRuns) {
+      const day = periodRunsByDate.get(run.localDate);
+      if (!day) {
+        continue;
+      }
 
-  const runChartMetrics: DashboardChartMetric[] = [
-    buildVisualMetric(
-      "每日跑量",
-      "公里",
-      recentDateLabels.map((localDate) => ({
-        localDate,
-        value: runsByDate.get(localDate)?.distanceKm ?? 0,
-      })),
-      "motion",
-    ),
-    buildVisualMetric(
-      "跑步次数",
-      "次",
-      recentDateLabels.map((localDate) => ({
-        localDate,
-        value: runsByDate.get(localDate)?.count ?? 0,
-      })),
-      "motion",
-    ),
-    buildVisualMetric(
-      "平均配速",
-      "分钟/公里",
-      recentDateLabels
-        .map((localDate) => {
-          const day = runsByDate.get(localDate);
-          return day && day.paceRecordCount > 0
-            ? { localDate, value: day.paceSecondsTotal / day.paceRecordCount / 60 }
-            : null;
-        })
-        .filter((point): point is DashboardChartPoint => point != null),
-      "warning",
-    ),
-    buildVisualMetric(
-      "平均心率",
-      "次/分",
-      recentDateLabels
-        .map((localDate) => {
-          const day = runsByDate.get(localDate);
-          return day && day.heartRateRecordCount > 0
-            ? { localDate, value: day.heartRateTotal / day.heartRateRecordCount }
-            : null;
-        })
-        .filter((point): point is DashboardChartPoint => point != null),
-      "warning",
-    ),
-  ];
+      day.distanceKm += run.distanceKm;
+      day.count += 1;
+
+      if (run.paceSecondsPerKm != null) {
+        day.paceSecondsTotal += run.paceSecondsPerKm;
+        day.paceRecordCount += 1;
+      }
+
+      if (run.averageHeartRateBpm != null) {
+        day.heartRateTotal += run.averageHeartRateBpm;
+        day.heartRateRecordCount += 1;
+      }
+    }
+
+    return [
+      buildVisualMetric(
+        "每日跑量",
+        "公里",
+        periodDateLabels.map((localDate) => ({
+          localDate,
+          value: periodRunsByDate.get(localDate)?.distanceKm ?? 0,
+        })),
+        "motion",
+      ),
+      buildVisualMetric(
+        "跑步次数",
+        "次",
+        periodDateLabels.map((localDate) => ({
+          localDate,
+          value: periodRunsByDate.get(localDate)?.count ?? 0,
+        })),
+        "motion",
+      ),
+      buildVisualMetric(
+        "平均配速",
+        "分钟/公里",
+        periodDateLabels
+          .map((localDate) => {
+            const day = periodRunsByDate.get(localDate);
+            return day && day.paceRecordCount > 0
+              ? { localDate, value: day.paceSecondsTotal / day.paceRecordCount / 60 }
+              : null;
+          })
+          .filter((point): point is DashboardChartPoint => point != null),
+        "warning",
+      ),
+      buildVisualMetric(
+        "平均心率",
+        "次/分",
+        periodDateLabels
+          .map((localDate) => {
+            const day = periodRunsByDate.get(localDate);
+            return day && day.heartRateRecordCount > 0
+              ? { localDate, value: day.heartRateTotal / day.heartRateRecordCount }
+              : null;
+          })
+          .filter((point): point is DashboardChartPoint => point != null),
+        "warning",
+      ),
+    ];
+  };
 
   const chartPanels: DashboardChartPanel[] = [
     {
       title: "健康曲线",
-      periodLabel: "最近 30 天",
       description: "每个指标独立缩放，重点观察方向和波动。",
-      metrics: healthChartMetrics,
+      periodOptions: chartRangeOptions.map((range) => ({
+        ...range,
+        metrics: buildHealthChartMetrics(range.days),
+      })),
     },
     {
       title: "运动曲线",
-      periodLabel: "最近 30 天",
       description: "跑量和次数按自然日展示，配速和心率按有记录的日期展示。",
-      metrics: runChartMetrics,
+      periodOptions: chartRangeOptions.map((range) => ({
+        ...range,
+        metrics: buildRunChartMetrics(range.days),
+      })),
     },
   ];
 
@@ -712,7 +669,6 @@ export function createDashboardSummary({
     statusItems,
     metricCards,
     chartPanels,
-    trendCards,
     progressCards,
     encouragement,
   };

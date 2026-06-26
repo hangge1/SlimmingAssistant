@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { DashboardChartMetric, DashboardChartPanel } from "../services/dashboard-summary";
+import type { DashboardChartMetric, DashboardChartPanel, DashboardChartPeriodOption } from "../services/dashboard-summary";
 
 type TrendLineChartProps = {
   panel: DashboardChartPanel;
@@ -58,7 +58,7 @@ function buildDomain(values: number[], includeZero: boolean) {
   return min === max ? { min: min - 1, max: max + 1 } : { min, max };
 }
 
-function buildChart(metric: DashboardChartMetric) {
+function buildChart(metric: DashboardChartMetric, period: DashboardChartPeriodOption) {
   if (metric.points.length === 0) {
     return {
       points: [] as ChartPoint[],
@@ -67,10 +67,9 @@ function buildChart(metric: DashboardChartMetric) {
     };
   }
 
-  const times = metric.points.map((point) => parseLocalDate(point.localDate));
   const values = metric.points.map((point) => point.value);
-  const minTime = Math.min(...times);
-  const maxTime = Math.max(...times);
+  const minTime = parseLocalDate(period.startLocalDate);
+  const maxTime = parseLocalDate(period.endLocalDate);
   const includeZero = metric.label.includes("跑量") || metric.label.includes("次数");
   const domain = buildDomain(values, includeZero);
   const usableWidth = chartWidth - chartPadding.left - chartPadding.right;
@@ -113,16 +112,19 @@ function tooltipY(point: ChartPoint) {
 }
 
 export function TrendLineChart({ panel }: TrendLineChartProps) {
-  const [selectedLabel, setSelectedLabel] = useState(panel.metrics[0]?.label ?? "");
+  const defaultPeriod = panel.periodOptions[0];
+  const [selectedPeriodLabel, setSelectedPeriodLabel] = useState(defaultPeriod?.label ?? "");
+  const [selectedLabel, setSelectedLabel] = useState(defaultPeriod?.metrics[0]?.label ?? "");
   const [activePoint, setActivePoint] = useState<ChartPoint | null>(null);
-  const selectedMetric = panel.metrics.find((metric) => metric.label === selectedLabel) ?? panel.metrics[0];
+  const selectedPeriod =
+    panel.periodOptions.find((option) => option.label === selectedPeriodLabel) ?? defaultPeriod;
+  const selectedMetric =
+    selectedPeriod?.metrics.find((metric) => metric.label === selectedLabel) ?? selectedPeriod?.metrics[0];
   const color = selectedMetric ? toneColor(selectedMetric.tone) : "var(--primary)";
   const chart = useMemo(
-    () => (selectedMetric ? buildChart(selectedMetric) : { points: [], path: "", axisLabels: [] }),
-    [selectedMetric],
+    () => (selectedMetric && selectedPeriod ? buildChart(selectedMetric, selectedPeriod) : { points: [], path: "", axisLabels: [] }),
+    [selectedMetric, selectedPeriod],
   );
-  const firstPoint = chart.points[0];
-  const latestPoint = chart.points[chart.points.length - 1];
 
   return (
     <article className="card p-4">
@@ -132,9 +134,31 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
           <p className="m-0 mt-1 text-sm text-[var(--ink-secondary)]">{panel.description}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-[var(--surface-subtle)] px-2 py-1 text-xs font-semibold text-[var(--ink-secondary)]">
-            {panel.periodLabel}
-          </span>
+          <label className="sr-only" htmlFor={`${panel.title}-period`}>
+            切换时间范围
+          </label>
+          <select
+            className="min-h-9 rounded-md border border-[var(--border-soft)] bg-white px-3 text-sm font-semibold text-[var(--ink-primary)]"
+            id={`${panel.title}-period`}
+            onChange={(event) => {
+              const nextPeriodLabel = event.target.value;
+              const nextPeriod = panel.periodOptions.find((option) => option.label === nextPeriodLabel);
+              setSelectedPeriodLabel(nextPeriodLabel);
+              setSelectedLabel((currentLabel) =>
+                nextPeriod?.metrics.some((metric) => metric.label === currentLabel)
+                  ? currentLabel
+                  : nextPeriod?.metrics[0]?.label ?? "",
+              );
+              setActivePoint(null);
+            }}
+            value={selectedPeriod?.label ?? ""}
+          >
+            {panel.periodOptions.map((option) => (
+              <option key={option.label} value={option.label}>
+                {option.label}
+              </option>
+            ))}
+          </select>
           <label className="sr-only" htmlFor={`${panel.title}-metric`}>
             切换曲线指标
           </label>
@@ -147,7 +171,7 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
             }}
             value={selectedMetric?.label ?? ""}
           >
-            {panel.metrics.map((metric) => (
+            {(selectedPeriod?.metrics ?? []).map((metric) => (
               <option key={metric.label} value={metric.label}>
                 {metric.label}
               </option>
@@ -264,10 +288,10 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
                   </g>
                 ) : null}
                 <text fill="var(--ink-muted)" fontSize="12" textAnchor="start" x={chartPadding.left} y={chartHeight - 10}>
-                  {firstPoint ? formatDateLabel(firstPoint.localDate) : "--"}
+                  {selectedPeriod ? formatDateLabel(selectedPeriod.startLocalDate) : "--"}
                 </text>
                 <text fill="var(--ink-muted)" fontSize="12" textAnchor="end" x={chartWidth - chartPadding.right} y={chartHeight - 10}>
-                  {latestPoint ? formatDateLabel(latestPoint.localDate) : "--"}
+                  {selectedPeriod ? formatDateLabel(selectedPeriod.endLocalDate) : "--"}
                 </text>
               </svg>
             ) : (

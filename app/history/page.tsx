@@ -169,14 +169,36 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
             <section className="grid gap-3">
               {entries.map((entry) => (
                 <article className="card p-4" key={`${entry.kind}-${entry.id}`}>
-                  <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <p className="m-0 text-sm text-[var(--ink-secondary)]">{entry.localDate}</p>
                       <h2 className="m-0 text-lg font-semibold text-[var(--ink-primary)]">{entry.title}</h2>
                     </div>
-                    <span className="w-fit rounded-md bg-[var(--surface-subtle)] px-2 py-1 text-sm text-[var(--ink-secondary)]">
-                      {entry.kind === "health" ? "健康" : "跑步"}
-                    </span>
+                    <div className="flex flex-wrap items-start gap-2 sm:justify-end">
+                      <span className="min-h-10 rounded-md bg-[var(--surface-subtle)] px-3 py-2 text-sm text-[var(--ink-secondary)]">
+                        {entry.kind === "health" ? "健康" : "跑步"}
+                      </span>
+                      <Link
+                        className="inline-flex min-h-10 items-center rounded-md border border-[var(--border-soft)] px-3 text-sm font-semibold text-[var(--ink-primary)]"
+                        href={`/history/${entry.kind}/${entry.id}/edit`}
+                      >
+                        编辑
+                      </Link>
+                      <details className="rounded-md border border-[var(--border-soft)] px-3 py-2 text-sm">
+                        <summary className="cursor-pointer font-semibold text-[var(--danger)]">删除</summary>
+                        <form action={deleteRecordAction} className="mt-3 grid gap-3">
+                          <input name="kind" type="hidden" value={entry.kind} />
+                          <input name="id" type="hidden" value={entry.id} />
+                          <label className="flex items-center gap-2 text-[var(--ink-primary)]">
+                            <input name="confirmDelete" type="checkbox" value="yes" />
+                            确认删除这条记录
+                          </label>
+                          <Button type="submit" variant="secondary">
+                            确认删除
+                          </Button>
+                        </form>
+                      </details>
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {entry.metrics.length > 0 ? (
@@ -191,28 +213,6 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
                     ) : (
                       <span className="text-sm text-[var(--ink-secondary)]">没有可显示的指标</span>
                     )}
-                  </div>
-                  <div className="mt-4 flex flex-wrap items-start gap-3 border-t border-[var(--border-soft)] pt-3">
-                    <Link
-                      className="inline-flex min-h-10 items-center rounded-md border border-[var(--border-soft)] px-3 text-sm font-semibold text-[var(--ink-primary)]"
-                      href={`/history/${entry.kind}/${entry.id}/edit`}
-                    >
-                      编辑
-                    </Link>
-                    <details className="rounded-md border border-[var(--border-soft)] px-3 py-2 text-sm">
-                      <summary className="cursor-pointer font-semibold text-[var(--danger)]">删除</summary>
-                      <form action={deleteRecordAction} className="mt-3 grid gap-3">
-                        <input name="kind" type="hidden" value={entry.kind} />
-                        <input name="id" type="hidden" value={entry.id} />
-                        <label className="flex items-center gap-2 text-[var(--ink-primary)]">
-                          <input name="confirmDelete" type="checkbox" value="yes" />
-                          确认删除这条记录
-                        </label>
-                        <Button type="submit" variant="secondary">
-                          确认删除
-                        </Button>
-                      </form>
-                    </details>
                   </div>
                 </article>
               ))}

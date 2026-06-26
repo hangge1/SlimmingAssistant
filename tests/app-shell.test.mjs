@@ -127,7 +127,11 @@ test("首页是应用仪表盘，不是营销页面", () => {
   assert.match(pageSource, /todayStatusLabel/);
   assert.match(pageSource, /createDashboardSummary/);
   assert.match(pageSource, /TrendLineChart/);
+  assert.match(pageSource, /GoalProgressChart/);
+  assert.match(pageSource, /strokeDasharray/);
   assert.match(pageSource, /数据曲线/);
+  assert.ok(pageSource.indexOf('id="goal-progress"') < pageSource.indexOf('aria-label="首页摘要"'));
+  assert.ok(pageSource.indexOf('id="goal-progress"') < pageSource.indexOf('id="data-curves"'));
   assert.match(pageSource, /href="\/records"|href: "\/records"/);
   assert.match(pageSource, /requireTrustedDevice/);
   assert.doesNotMatch(pageSource, /\.insert\(|\.update\(|\.delete\(/);
@@ -137,6 +141,9 @@ test("首页是应用仪表盘，不是营销页面", () => {
 test("首页曲线图使用 SVG 展示健康和运动趋势", () => {
   assert.match(trendLineChartSource, /use client/);
   assert.match(trendLineChartSource, /<select/);
+  assert.match(trendLineChartSource, /selectedPeriodLabel/);
+  assert.match(trendLineChartSource, /startLocalDate/);
+  assert.match(trendLineChartSource, /endLocalDate/);
   assert.match(trendLineChartSource, /<svg/);
   assert.match(trendLineChartSource, /<path/);
   assert.match(trendLineChartSource, /axisLabels/);
@@ -207,6 +214,8 @@ test("历史编辑和删除入口受保护并复用 records service", () => {
 
   assert.match(historyPageSource, /确认删除这条记录/);
   assert.match(historyPageSource, /\/history\/\$\{entry.kind\}\/\$\{entry.id\}\/edit/);
+  assert.match(historyPageSource, /sm:justify-end/);
+  assert.doesNotMatch(historyPageSource, /border-t border-\[var\(--border-soft\)\] pt-3/);
 });
 
 test("历史页提供按日期补录入口，记录保存使用提交日期", () => {
@@ -217,7 +226,8 @@ test("历史页提供按日期补录入口，记录保存使用提交日期", ()
 
   assert.match(recordsPageSource, /searchParams/);
   assert.match(recordsPageSource, /validateLocalDate/);
-  assert.match(recordsPageSource, /历史补录/);
+  assert.match(recordsPageSource, /提交记录/);
+  assert.match(recordsPageSource, /记录日期/);
   assert.match(recordsPageSource, /localDate=\{localDate\}/);
 
   for (const source of [saveHealthRecordActionSource, saveRunRecordActionSource]) {
@@ -353,16 +363,19 @@ test("主要路由可以通过 Next 实际渲染", { timeout: 90_000 }, async ()
         assert.match(html, /目标进度/);
         assert.match(html, /健康目标进度/);
         assert.match(html, /跑步目标进度/);
+        assert.match(html, /完成度/);
         assert.match(html, /无法可靠估算/);
         assert.match(html, /数据曲线/);
         assert.match(html, /健康曲线/);
         assert.match(html, /运动曲线/);
         assert.match(html, /每日跑量/);
-        assert.match(html, /趋势和 BMI/);
         assert.match(html, /最近 7 天/);
+        assert.match(html, /最近 1 个月/);
+        assert.match(html, /最近半年/);
+        assert.match(html, /最近 1 年/);
         assert.match(html, /最近 30 天/);
         assert.match(html, /BMI/);
-        assert.match(html, /数据不足/);
+        assert.doesNotMatch(html, /趋势和 BMI/);
       }
 
       if (path === "/history") {
