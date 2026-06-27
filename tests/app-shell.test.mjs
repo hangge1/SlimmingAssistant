@@ -103,8 +103,19 @@ function createInitializedAccessDatabase() {
   return {
     deviceToken,
     sqlitePath,
-    cleanup() {
-      rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    async cleanup() {
+      for (let attempt = 0; attempt < 10; attempt += 1) {
+        try {
+          rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+          return;
+        } catch (error) {
+          if (!["EBUSY", "ENOTEMPTY", "EPERM"].includes(error.code) || attempt === 9) {
+            throw error;
+          }
+
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      }
     },
   };
 }
@@ -370,7 +381,6 @@ test("主要路由可以通过 Next 实际渲染", { timeout: 90_000 }, async ()
         assert.match(html, /运动曲线/);
         assert.match(html, /每日跑量/);
         assert.match(html, /最近 7 天/);
-        assert.match(html, /最近 1 个月/);
         assert.match(html, /最近半年/);
         assert.match(html, /最近 1 年/);
         assert.match(html, /最近 30 天/);
@@ -434,6 +444,6 @@ test("主要路由可以通过 Next 实际渲染", { timeout: 90_000 }, async ()
         new Promise((resolve) => setTimeout(resolve, 5_000)),
       ]);
     }
-    accessDb.cleanup();
+    await accessDb.cleanup();
   }
 });

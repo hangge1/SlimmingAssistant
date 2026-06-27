@@ -302,7 +302,7 @@ export function createDashboardSummary({
 
   const chartRangeOptions = [
     { label: "最近 7 天", days: 7 },
-    { label: "最近 1 个月", days: 30 },
+    { label: "最近 30 天", days: 30 },
     { label: "最近半年", days: 183 },
     { label: "最近 1 年", days: 365 },
   ].map((range) => ({
@@ -355,6 +355,15 @@ export function createDashboardSummary({
           "warning",
         ),
       );
+    } else {
+      metrics.push({
+        label: "BMI",
+        unit: "",
+        value: "待设置身高",
+        change: "设置身高后显示 BMI",
+        tone: "warning",
+        points: [],
+      });
     }
 
     return metrics;

@@ -106,6 +106,8 @@ test("首页摘要在空数据时返回中文引导状态", () => {
   assert.equal(summary.chartPanels[0].title, "健康曲线");
   assert.equal(summary.chartPanels[1].title, "运动曲线");
   assert.equal(summary.chartPanels[0].periodOptions[0].metrics[0].label, "体重");
+  assert.equal(summary.chartPanels[0].periodOptions[0].metrics[3].label, "BMI");
+  assert.equal(summary.chartPanels[0].periodOptions[0].metrics[3].value, "待设置身高");
   assert.equal(summary.chartPanels[1].periodOptions[0].metrics[0].label, "每日跑量");
   assert.equal("trendCards" in summary, false);
 });
@@ -150,7 +152,7 @@ test("首页摘要会计算健康曲线、跑步曲线和 BMI 指标", () => {
   assert.match(summary.metricCards[0].description, /BMI 24.5/);
   assert.deepEqual(
     summary.chartPanels[0].periodOptions.map((option) => option.label),
-    ["最近 7 天", "最近 1 个月", "最近半年", "最近 1 年"],
+    ["最近 7 天", "最近 30 天", "最近半年", "最近 1 年"],
   );
   assert.equal(summary.chartPanels[0].periodOptions[0].days, 7);
   assert.equal(summary.chartPanels[0].periodOptions[0].startLocalDate, "2026-06-20");
@@ -169,7 +171,7 @@ test("首页摘要会计算健康曲线、跑步曲线和 BMI 指标", () => {
   assert.equal(healthMonthOption.metrics[0].change, "变化 -1.2 公斤");
   assert.deepEqual(
     summary.chartPanels[1].periodOptions.map((option) => option.label),
-    ["最近 7 天", "最近 1 个月", "最近半年", "最近 1 年"],
+    ["最近 7 天", "最近 30 天", "最近半年", "最近 1 年"],
   );
   const runDefaultOption = summary.chartPanels[1].periodOptions[0];
   const runMonthOption = summary.chartPanels[1].periodOptions.find((option) => option.days === 30);
