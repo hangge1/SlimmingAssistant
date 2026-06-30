@@ -67,7 +67,7 @@ export function RunRecordForm({ initialState, localDate }: RunRecordFormProps) {
         </p>
       ) : null}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid max-w-[320px] gap-3">
         {fields.map((field) => {
           const errorId = `${field.name}-error`;
           const error = fieldErrors[field.name];
@@ -100,7 +100,7 @@ export function RunRecordForm({ initialState, localDate }: RunRecordFormProps) {
         })}
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid max-w-[320px] gap-2">
         <span className="text-sm font-semibold text-[var(--ink-primary)]">配速</span>
         <div className="flex min-h-11 items-center justify-between rounded-md border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-3 text-sm text-[var(--ink-secondary)]">
           <span>{calculatedPace}</span>
@@ -110,7 +110,7 @@ export function RunRecordForm({ initialState, localDate }: RunRecordFormProps) {
 
       <div>
         <Button type="submit" disabled={pending}>
-          保存跑步记录
+          完成跑步打卡
         </Button>
       </div>
     </form>
