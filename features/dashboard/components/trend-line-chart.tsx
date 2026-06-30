@@ -23,14 +23,14 @@ const chartPadding = {
 
 function toneColor(tone: DashboardChartMetric["tone"]) {
   if (tone === "health") {
-    return "var(--health)";
+    return "#16a34a";
   }
 
   if (tone === "motion") {
-    return "var(--motion)";
+    return "#0284c7";
   }
 
-  return "var(--warning)";
+  return "#d97706";
 }
 
 function parseLocalDate(localDate: string) {
@@ -127,7 +127,7 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
   );
 
   return (
-    <article className="card p-4">
+    <article className="rounded-md border border-[#d5e4e6] bg-white p-4">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="m-0 text-base font-semibold text-[var(--ink-primary)]">{panel.title}</h3>
@@ -138,7 +138,7 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
             切换时间范围
           </label>
           <select
-            className="min-h-9 rounded-md border border-[var(--border-soft)] bg-white px-3 text-sm font-semibold text-[var(--ink-primary)]"
+            className="min-h-9 rounded-md border border-[#cbdde0] bg-[#f8fbfb] px-3 text-sm font-semibold text-[var(--ink-primary)]"
             id={`${panel.title}-period`}
             onChange={(event) => {
               const nextPeriodLabel = event.target.value;
@@ -163,7 +163,7 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
             切换曲线指标
           </label>
           <select
-            className="min-h-9 rounded-md border border-[var(--border-soft)] bg-white px-3 text-sm font-semibold text-[var(--ink-primary)]"
+            className="min-h-9 rounded-md border border-[#cbdde0] bg-[#f8fbfb] px-3 text-sm font-semibold text-[var(--ink-primary)]"
             id={`${panel.title}-metric`}
             onChange={(event) => {
               setSelectedLabel(event.target.value);
@@ -182,7 +182,7 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
 
       {selectedMetric ? (
         <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <div className="rounded-md border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-3">
+          <div className="rounded-md border border-[#d5e4e6] bg-[#f4f8f8] p-3">
             <p className="m-0 text-sm font-semibold text-[var(--ink-primary)]">{selectedMetric.label}</p>
             <div className="mt-3 flex items-baseline gap-2">
               <span className="text-[32px] font-bold leading-none text-[var(--ink-primary)]">
@@ -195,7 +195,7 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
             <p className="m-0 mt-2 text-sm text-[var(--ink-secondary)]">{selectedMetric.change}</p>
           </div>
 
-          <div className="min-h-80 overflow-hidden rounded-md border border-[var(--border-soft)] bg-white p-3">
+          <div className="min-h-80 overflow-hidden rounded-md border border-[#d5e4e6] bg-[#fbfdfd] p-3">
             {chart.path ? (
               <svg
                 aria-label={`${panel.title}-${selectedMetric.label}曲线`}
@@ -207,7 +207,7 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
                 {chart.axisLabels.map((axis) => (
                   <g key={axis.label}>
                     <line
-                      stroke="var(--border-soft)"
+                      stroke="#dbe8ea"
                       strokeDasharray="4 4"
                       strokeWidth="1"
                       x1={chartPadding.left}
@@ -227,7 +227,7 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
                   </g>
                 ))}
                 <line
-                  stroke="var(--border-soft)"
+                  stroke="#dbe8ea"
                   strokeWidth="1"
                   x1={chartPadding.left}
                   x2={chartPadding.left}
@@ -235,7 +235,7 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
                   y2={chartHeight - chartPadding.bottom}
                 />
                 <line
-                  stroke="var(--border-soft)"
+                  stroke="#dbe8ea"
                   strokeWidth="1"
                   x1={chartPadding.left}
                   x2={chartWidth - chartPadding.right}
@@ -272,7 +272,7 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
                       y2={chartHeight - chartPadding.bottom}
                     />
                     <rect
-                      fill="var(--ink-primary)"
+                      fill="#12333c"
                       height="38"
                       rx="6"
                       width="120"
@@ -302,7 +302,7 @@ export function TrendLineChart({ panel }: TrendLineChartProps) {
           </div>
         </div>
       ) : (
-        <div className="flex min-h-72 items-center justify-center rounded-md border border-[var(--border-soft)] bg-[var(--surface-subtle)] text-sm text-[var(--ink-secondary)]">
+        <div className="flex min-h-72 items-center justify-center rounded-md border border-[#d5e4e6] bg-[#f4f8f8] text-sm text-[var(--ink-secondary)]">
           暂无可绘制数据
         </div>
       )}
