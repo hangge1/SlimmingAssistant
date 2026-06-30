@@ -45,6 +45,7 @@ export async function saveRunGoalAction(
 
   revalidatePath("/goals");
   revalidatePath("/");
+  revalidatePath("/data");
 
   return {
     values: runGoalToFormValues(saved.data),

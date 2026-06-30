@@ -49,6 +49,54 @@ export type DashboardEncouragement = {
   text: string;
 };
 
+export type DashboardFocusMetric = {
+  label: string;
+  targetValue: string;
+  targetUnit: string;
+  currentValue: string;
+  currentUnit: string;
+  gap: string;
+  dailyChange: string;
+  projectedDays: string;
+  status: "未设置" | "待记录" | "进行中" | "已达成";
+  tone: "health" | "warning";
+  href: string;
+};
+
+export type DashboardTodayBattle = {
+  status: "待开始" | "已开始" | "已完成";
+  title: string;
+  text: string;
+  primaryActionLabel: string;
+  primaryActionHref: string;
+  items: Array<{
+    label: string;
+    value: string;
+    done: boolean;
+    href: string;
+  }>;
+};
+
+export type DashboardRunWeek = {
+  status: "未设置" | "待开始" | "进行中" | "已完成";
+  completedCount: number;
+  targetCount: number | null;
+  remainingCount: number | null;
+  completedDistance: string;
+  targetDistance: string;
+  remainingDistance: string;
+  text: string;
+  href: string;
+};
+
+export type DashboardAntiSlacking = {
+  title: string;
+  text: string;
+  actionLabel: string;
+  href: string;
+  tone: "warning" | "health" | "motion";
+};
+
 export type DashboardChartPoint = {
   localDate: string;
   value: number;
@@ -129,6 +177,27 @@ function formatDays(days: number) {
   return `约 ${Math.max(1, Math.ceil(days))} 天`;
 }
 
+function formatDelta(value: number, unit: string) {
+  const formatted = formatSignedNumber(value);
+  return `${formatted}${unit}`;
+}
+
+function buildProjectedDays(remaining: number, dailyChange: number | null) {
+  if (remaining <= 0) {
+    return "已达到目标";
+  }
+
+  if (dailyChange == null) {
+    return "数据不足";
+  }
+
+  if (dailyChange >= 0) {
+    return "趋势未靠近";
+  }
+
+  return formatDays(remaining / Math.abs(dailyChange));
+}
+
 function getErrorSafeData<T>(result: { ok: true; data: T } | { ok: false }) {
   return result.ok ? result.data : null;
 }
@@ -172,6 +241,23 @@ function buildVisualMetric(
   };
 }
 
+function countConsecutiveMissingRunDays(allRuns: Array<{ localDate: string }>, todayLocalDate: string) {
+  const runDates = new Set(allRuns.map((record) => record.localDate));
+  let missingDays = 0;
+
+  for (let offset = 0; offset < 14; offset += 1) {
+    const localDate = addDays(todayLocalDate, -offset);
+
+    if (runDates.has(localDate)) {
+      break;
+    }
+
+    missingDays += 1;
+  }
+
+  return missingDays;
+}
+
 export function createDashboardSummary({
   recordsRepository,
   goalsRepository,
@@ -189,15 +275,124 @@ export function createDashboardSummary({
   const latestHealth = todayHealth ?? latestHealthRecords[0] ?? null;
   const todayRunDistance = todayRuns.reduce((sum, record) => sum + record.distanceKm, 0);
   const hasAnyGoal = healthGoal != null || runGoal != null;
+  const healthRecordsByDateAsc = [...latestHealthRecords].sort(
+    (a, b) => parseLocalDate(a.localDate) - parseLocalDate(b.localDate),
+  );
+
+  const buildHealthFocusMetric = (
+    label: string,
+    target: number | null | undefined,
+    unit: string,
+    getValue: (record: (typeof latestHealthRecords)[number]) => number | null,
+    tone: DashboardFocusMetric["tone"],
+  ): DashboardFocusMetric => {
+    if (target == null) {
+      return {
+        label,
+        targetValue: "未设置",
+        targetUnit: unit,
+        currentValue: "暂无",
+        currentUnit: unit,
+        gap: "请先设置目标",
+        dailyChange: "暂无变化",
+        projectedDays: "无法估算",
+        status: "未设置",
+        tone,
+        href: "/#goal-settings",
+      };
+    }
+
+    const validRecords = healthRecordsByDateAsc
+      .map((record) => ({
+        localDate: record.localDate,
+        value: getValue(record),
+      }))
+      .filter((record): record is { localDate: string; value: number } => record.value != null);
+    const latest = validRecords[validRecords.length - 1];
+    const previous = validRecords[validRecords.length - 2];
+
+    if (!latest) {
+      return {
+        label,
+        targetValue: formatNumber(target),
+        targetUnit: unit,
+        currentValue: "暂无",
+        currentUnit: unit,
+        gap: "需要先记录当前值",
+        dailyChange: "暂无变化",
+        projectedDays: "无法估算",
+        status: "待记录",
+        tone,
+        href: "/records",
+      };
+    }
+
+    const remaining = latest.value - target;
+    const days = previous ? Math.max(1, daysBetween(previous.localDate, latest.localDate)) : 0;
+    const dailyChange = previous ? (latest.value - previous.value) / days : null;
+
+    return {
+      label,
+      targetValue: formatNumber(target),
+      targetUnit: unit,
+      currentValue: formatNumber(latest.value),
+      currentUnit: unit,
+      gap: remaining <= 0 ? "已达到目标" : `还差 ${formatNumber(remaining)}${unit}`,
+      dailyChange: dailyChange == null ? "暂无变化" : `日均 ${formatDelta(dailyChange, unit)}`,
+      projectedDays: buildProjectedDays(remaining, dailyChange),
+      status: remaining <= 0 ? "已达成" : "进行中",
+      tone,
+      href: "/records",
+    };
+  };
+
+  const focusMetrics: DashboardFocusMetric[] = [
+    buildHealthFocusMetric("目标体重", healthGoal?.targetWeightKg, "公斤", (record) => record.weightKg, "health"),
+    buildHealthFocusMetric("目标腰围", healthGoal?.targetWaistCm, "厘米", (record) => record.waistCm, "warning"),
+  ];
+  const hasTodayHealth = todayHealth != null;
+  const hasTodayRun = todayRuns.length > 0;
+  const todayBattle: DashboardTodayBattle = {
+    status: hasTodayHealth && hasTodayRun ? "已完成" : hasTodayHealth || hasTodayRun ? "已开始" : "待开始",
+    title: hasTodayHealth && hasTodayRun ? "今日打卡闭环已完成" : hasTodayRun ? "跑步已打卡，补齐健康打卡" : "今天还没跑步打卡",
+    text:
+      hasTodayHealth && hasTodayRun
+        ? "今天的跑步和健康数据都已记录，首页目标差距会使用最新数据。"
+        : hasTodayRun
+          ? "跑步打卡已经完成，再补一条健康打卡，才能判断体重和腰围是否靠近目标。"
+          : "先完成一次跑步打卡，再补健康打卡，让今天进入减肥循环。",
+    primaryActionLabel: hasTodayHealth && hasTodayRun ? "查看历史证据" : hasTodayRun ? "补健康打卡" : "去跑步打卡",
+    primaryActionHref: hasTodayHealth && hasTodayRun ? "/history" : "/records",
+    items: [
+      {
+        label: "跑步打卡",
+        value: hasTodayRun ? `已记录 ${todayRuns.length} 次` : "未完成",
+        done: hasTodayRun,
+        href: "/records",
+      },
+      {
+        label: "健康打卡",
+        value: hasTodayHealth ? "已记录" : "未记录",
+        done: hasTodayHealth,
+        href: "/records",
+      },
+      {
+        label: "目标反馈",
+        value: hasTodayHealth || latestHealth ? "可查看" : "待数据",
+        done: hasTodayHealth || latestHealth != null,
+        href: "/data",
+      },
+    ],
+  };
 
   const statusItems: DashboardStatusItem[] = [
     {
-      label: "身体数据",
+      label: "健康打卡",
       value: todayHealth ? "已记录" : "待记录",
       href: "/records",
     },
     {
-      label: "跑步记录",
+      label: "跑步打卡",
       value: todayRuns.length > 0 ? `已记录 ${todayRuns.length} 次` : "待添加",
       href: "/records",
     },
@@ -209,7 +404,7 @@ export function createDashboardSummary({
     {
       label: "目标设置",
       value: hasAnyGoal ? "已设置" : "待设置",
-      href: "/goals",
+      href: "/#goal-settings",
     },
   ];
 
@@ -233,6 +428,55 @@ export function createDashboardSummary({
   const recentGoalRuns = filterByRecentDays(allRuns, todayLocalDate, 7);
   const recentGoalRunCount = recentGoalRuns.length;
   const recentGoalRunDistance = recentGoalRuns.reduce((sum, record) => sum + record.distanceKm, 0);
+  const runWeek: DashboardRunWeek = {
+    status:
+      runGoal?.weeklyRunCount == null || runGoal.weeklyDistanceKm == null
+        ? "未设置"
+        : recentGoalRunCount === 0 && recentGoalRunDistance === 0
+          ? "待开始"
+          : recentGoalRunCount >= runGoal.weeklyRunCount && recentGoalRunDistance >= runGoal.weeklyDistanceKm
+            ? "已完成"
+            : "进行中",
+    completedCount: recentGoalRunCount,
+    targetCount: runGoal?.weeklyRunCount ?? null,
+    remainingCount: runGoal?.weeklyRunCount == null ? null : Math.max(0, runGoal.weeklyRunCount - recentGoalRunCount),
+    completedDistance: formatNumber(recentGoalRunDistance),
+    targetDistance: runGoal?.weeklyDistanceKm == null ? "未设置" : formatNumber(runGoal.weeklyDistanceKm),
+    remainingDistance:
+      runGoal?.weeklyDistanceKm == null ? "未设置" : formatNumber(Math.max(0, runGoal.weeklyDistanceKm - recentGoalRunDistance)),
+    text:
+      runGoal?.weeklyRunCount == null || runGoal.weeklyDistanceKm == null
+        ? "先设置每周跑步次数和跑量，首页才能催促你完成本周行动。"
+        : `最近 7 天已跑 ${recentGoalRunCount} 次 / ${formatNumber(recentGoalRunDistance)} 公里。`,
+    href: runGoal?.weeklyRunCount == null || runGoal.weeklyDistanceKm == null ? "/#goal-settings" : "/records",
+  };
+  const missingRunDays = countConsecutiveMissingRunDays(allRuns, todayLocalDate);
+  const antiSlacking: DashboardAntiSlacking = hasTodayRun
+    ? hasTodayHealth
+      ? {
+          title: "今天的行动已经留下证据",
+          text: "跑步和健康打卡都已记录。明天继续重复这个闭环，趋势才会越来越可信。",
+          actionLabel: "查看历史证据",
+          href: "/history",
+          tone: "health",
+        }
+      : {
+          title: "别让今天的跑步缺少反馈",
+          text: "你已经跑了，补上体重和腰围，才能知道这次行动是否正在把你推向目标。",
+          actionLabel: "补健康打卡",
+          href: "/records",
+          tone: "motion",
+        }
+    : {
+        title: missingRunDays >= 2 ? `已经 ${missingRunDays} 天没有跑步打卡` : "今天还没有跑步打卡",
+        text:
+          missingRunDays >= 2
+            ? "目标不会因为计划存在而靠近。今天先恢复一次，不需要完美，只需要重新开始。"
+            : "你不是缺计划，是缺今天这一次行动。先完成一次跑步，数据会替你证明没有白做。",
+        actionLabel: "完成跑步打卡",
+        href: "/records",
+        tone: "warning",
+      };
   const healthGoalSummary =
     healthGoal?.targetWeightKg == null
       ? null
@@ -675,6 +919,10 @@ export function createDashboardSummary({
 
   return {
     localDate: todayLocalDate,
+    focusMetrics,
+    todayBattle,
+    runWeek,
+    antiSlacking,
     statusItems,
     metricCards,
     chartPanels,

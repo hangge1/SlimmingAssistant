@@ -47,6 +47,7 @@ export async function saveHealthGoalAction(
 
   revalidatePath("/goals");
   revalidatePath("/");
+  revalidatePath("/data");
 
   return {
     values: healthGoalToFormValues(saved.data),
