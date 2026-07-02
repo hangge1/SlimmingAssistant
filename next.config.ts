@@ -7,6 +7,7 @@ const serverActionAllowedOrigins = (process.env.SERVER_ACTION_ALLOWED_ORIGINS ??
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  serverExternalPackages: ["better-sqlite3"],
   experimental: serverActionAllowedOrigins.length
     ? {
         serverActions: {

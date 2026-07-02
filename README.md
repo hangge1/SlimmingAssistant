@@ -68,12 +68,54 @@ npm run dev
 ```bash
 npm run dev          # 启动开发服务
 npm run build        # 构建生产版本
+npm run start        # 启动生产服务，默认监听 0.0.0.0:3000
+npm run start:bt     # 宝塔一键启动入口，自动安装生产依赖、迁移数据库并启动
+npm run start:bt:3001 # 宝塔一键启动入口，固定监听 0.0.0.0:3001
+npm run release      # 本地构建并生成 Linux 服务器发布包
+npm run check        # 依次运行 lint、typecheck 和 test
 npm run lint         # 运行 ESLint
 npm run typecheck    # 生成 Next 类型并执行 TypeScript 检查
 npm run test         # 运行单元测试
 npm run db:generate  # 根据 schema 生成 Drizzle 迁移
 npm run db:migrate   # 执行数据库迁移
 ```
+
+## 生产部署
+
+推荐在本地或 CI 构建发布包，服务器只负责安装生产依赖、迁移数据库和启动服务。
+
+本地或 CI 执行：
+
+```bash
+npm install
+npm run release
+```
+
+上传 `dist/releases/*.tar.gz` 到服务器并解压后，宝塔项目的启动命令只填写一个：
+
+```bash
+npm run start:bt:3000
+```
+
+这个命令会自动完成三件事：
+
+- 首次部署或依赖变化时执行 `npm install --omit=dev`
+- 每次启动前执行 `npm run db:migrate`
+- 启动生产服务并监听 `0.0.0.0:3000`
+
+如果宝塔无法配置环境变量，并且需要改端口，可以直接使用固定端口脚本：
+
+```bash
+npm run start:bt:3001
+```
+
+或者在启动脚本后追加参数：
+
+```bash
+node scripts/start-bt.mjs --port 3001
+```
+
+不要把 `npm run build` 放进宝塔启动命令；构建应该在发布包生成阶段完成，避免服务器重启时打满 CPU 和内存。
 
 ## 目录结构
 

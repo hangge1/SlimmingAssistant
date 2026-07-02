@@ -25,6 +25,7 @@ const includeEntries = [
   "features",
   "lib",
   "scripts",
+  ".next",
   "components.json",
   "drizzle.config.ts",
   "eslint.config.mjs",
@@ -72,11 +73,12 @@ function copyEntry(entry) {
     filter: (sourcePath) => {
       const name = basename(sourcePath);
       return ![
-        ".next",
         ".git",
         "node_modules",
         "dist",
         "coverage",
+        "cache",
+        "dev",
         ".ui-screenshots",
         ".next-dev-logs",
       ].includes(name);
@@ -97,26 +99,19 @@ function run(command, args, options = {}) {
     stdio: "inherit",
   });
 
+  if (result.error) {
+    console.error(result.error.message);
+  }
+
   return result.status === 0;
 }
 
 function createArchive() {
   mkdirSync(releasesRoot, { recursive: true });
 
-  if (process.platform === "win32") {
-    const archivePath = resolve(releasesRoot, `${packageBaseName}.zip`);
-    const psCommand = [
-      "Compress-Archive",
-      "-Path",
-      JSON.stringify(join(packageRoot, "*")),
-      "-DestinationPath",
-      JSON.stringify(archivePath),
-      "-Force",
-    ].join(" ");
-
-    if (run("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", psCommand])) {
-      return archivePath;
-    }
+  const tarPath = resolve(releasesRoot, `${packageBaseName}.tar.gz`);
+  if (run("tar", ["-czf", tarPath, packageBaseName], { cwd: stagingRoot })) {
+    return tarPath;
   }
 
   const zipPath = resolve(releasesRoot, `${packageBaseName}.zip`);
@@ -124,9 +119,19 @@ function createArchive() {
     return zipPath;
   }
 
-  const tarPath = resolve(releasesRoot, `${packageBaseName}.tar.gz`);
-  if (run("tar", ["-czf", tarPath, packageBaseName], { cwd: stagingRoot })) {
-    return tarPath;
+  if (process.platform === "win32") {
+    const psCommand = [
+      "Compress-Archive",
+      "-Path",
+      JSON.stringify(join(packageRoot, "*")),
+      "-DestinationPath",
+      JSON.stringify(zipPath),
+      "-Force",
+    ].join(" ");
+
+    if (run("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", psCommand])) {
+      return zipPath;
+    }
   }
 
   throw new Error("Could not create archive. Install zip/tar, or run this script on Windows with PowerShell.");
@@ -140,6 +145,11 @@ function listTopLevelEntries(root) {
 }
 
 assertInside(distRoot, stagingRoot);
+
+if (!existsSync(resolve(projectRoot, ".next", "BUILD_ID"))) {
+  throw new Error("Production build is missing. Run npm run release instead of calling this script directly.");
+}
+
 rmSync(stagingRoot, { recursive: true, force: true });
 mkdirSync(packageRoot, { recursive: true });
 
