@@ -42,6 +42,13 @@ type UpdateUserPasswordInput = {
   nowIso: string;
 };
 
+type UpdateUserInput = {
+  userId: string;
+  displayName?: string | null;
+  role: UserRole;
+  nowIso: string;
+};
+
 function ok<T>(data: T): UserRepositoryResult<T> {
   return { ok: true, data };
 }
@@ -81,6 +88,14 @@ export function createUserRepository(appDb: AppDb = getDb()) {
         return ok(
           appDb.select().from(users).where(and(eq(users.id, id), isNull(users.disabledAtIso))).get() ?? null,
         );
+      } catch (error) {
+        return fail(mapRepositoryError(error));
+      }
+    },
+
+    getAnyUserById(id: string): UserRepositoryResult<User | null> {
+      try {
+        return ok(appDb.select().from(users).where(eq(users.id, id)).get() ?? null);
       } catch (error) {
         return fail(mapRepositoryError(error));
       }
@@ -205,6 +220,24 @@ export function createUserRepository(appDb: AppDb = getDb()) {
       }
     },
 
+    updateUser(input: UpdateUserInput): UserRepositoryResult<User | null> {
+      try {
+        appDb
+          .update(users)
+          .set({
+            displayName: input.displayName ?? null,
+            role: input.role,
+            updatedAtIso: input.nowIso,
+          })
+          .where(and(eq(users.id, input.userId), isNull(users.disabledAtIso)))
+          .run();
+
+        return ok(appDb.select().from(users).where(eq(users.id, input.userId)).get() ?? null);
+      } catch (error) {
+        return fail(mapRepositoryError(error));
+      }
+    },
+
     findActiveSessionByHash(sessionTokenHash: string, nowIso: string): UserRepositoryResult<UserSession | null> {
       try {
         const session =
@@ -242,6 +275,40 @@ export function createUserRepository(appDb: AppDb = getDb()) {
           .run();
 
         return ok(undefined);
+      } catch (error) {
+        return fail(mapRepositoryError(error));
+      }
+    },
+
+    revokeUserSessions(userId: string, nowIso: string): UserRepositoryResult<void> {
+      try {
+        appDb
+          .update(userSessions)
+          .set({
+            revokedAtIso: nowIso,
+            lastSeenAtIso: nowIso,
+          })
+          .where(and(eq(userSessions.userId, userId), isNull(userSessions.revokedAtIso)))
+          .run();
+
+        return ok(undefined);
+      } catch (error) {
+        return fail(mapRepositoryError(error));
+      }
+    },
+
+    disableUser(userId: string, nowIso: string): UserRepositoryResult<User | null> {
+      try {
+        appDb
+          .update(users)
+          .set({
+            disabledAtIso: nowIso,
+            updatedAtIso: nowIso,
+          })
+          .where(and(eq(users.id, userId), isNull(users.disabledAtIso)))
+          .run();
+
+        return ok(appDb.select().from(users).where(eq(users.id, userId)).get() ?? null);
       } catch (error) {
         return fail(mapRepositoryError(error));
       }

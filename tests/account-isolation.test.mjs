@@ -10,7 +10,11 @@ import { createGoalsRepository } from "../features/goals/repositories/goals-repo
 import { saveHealthGoal } from "../features/goals/services/goals-service.ts";
 import { createGuestGoalsRepository, createGuestRecordsRepository } from "../features/guest/repositories/guest-repositories.ts";
 import { createUserRepository } from "../features/access/repositories/user-repository.ts";
-import { createManagedUser } from "../features/access/services/admin-user-service.ts";
+import {
+  createManagedUser,
+  disableManagedUser,
+  updateManagedUser,
+} from "../features/access/services/admin-user-service.ts";
 import { verifyAccessPassword } from "../features/access/services/password-hashing.ts";
 import { createRecordsRepository } from "../features/records/repositories/records-repository.ts";
 import { saveHealthRecord } from "../features/records/services/records-service.ts";
@@ -161,6 +165,89 @@ test("管理员可以创建新的登录用户", async () => {
     assert.equal(found.ok ? found.data?.displayName : "", "用户 A");
     assert.equal(found.ok ? found.data?.role : "", "user");
     assert.equal(found.ok && found.data ? await verifyAccessPassword("password123", found.data.passwordHash) : false, true);
+  } finally {
+    cleanup();
+  }
+});
+
+test("管理员可以修改用户资料和重置密码", async () => {
+  const { db, cleanup } = createTempDb();
+
+  try {
+    const repository = createUserRepository(db);
+    await createManagedUser(repository, {
+      username: "admin_a",
+      displayName: "管理员 A",
+      role: "admin",
+      password: "password123",
+      confirmPassword: "password123",
+      nowIso: "2026-07-07T08:00:00.000Z",
+    });
+    await createManagedUser(repository, {
+      username: "user_b",
+      displayName: "用户 B",
+      role: "user",
+      password: "password123",
+      confirmPassword: "password123",
+      nowIso: "2026-07-07T08:01:00.000Z",
+    });
+    const admin = repository.getUserByUsername("admin_a").data;
+    const user = repository.getUserByUsername("user_b").data;
+
+    const updated = await updateManagedUser(repository, {
+      currentAdminUserId: admin.id,
+      userId: user.id,
+      displayName: "用户 B2",
+      role: "admin",
+      password: "newpassword123",
+      confirmPassword: "newpassword123",
+      nowIso: "2026-07-07T08:02:00.000Z",
+    });
+    const found = repository.getUserByUsername("user_b").data;
+
+    assert.equal(updated.ok, true);
+    assert.equal(found.displayName, "用户 B2");
+    assert.equal(found.role, "admin");
+    assert.equal(await verifyAccessPassword("newpassword123", found.passwordHash), true);
+  } finally {
+    cleanup();
+  }
+});
+
+test("用户管理不会停用或降级最后一个管理员", async () => {
+  const { db, cleanup } = createTempDb();
+
+  try {
+    const repository = createUserRepository(db);
+    await createManagedUser(repository, {
+      username: "admin_only",
+      displayName: "管理员",
+      role: "admin",
+      password: "password123",
+      confirmPassword: "password123",
+      nowIso: "2026-07-07T08:00:00.000Z",
+    });
+    const admin = repository.getUserByUsername("admin_only").data;
+
+    const demoted = await updateManagedUser(repository, {
+      currentAdminUserId: admin.id,
+      userId: admin.id,
+      displayName: "管理员",
+      role: "user",
+      password: "",
+      confirmPassword: "",
+      nowIso: "2026-07-07T08:01:00.000Z",
+    });
+    const disabled = disableManagedUser(repository, {
+      currentAdminUserId: "other-admin",
+      userId: admin.id,
+      nowIso: "2026-07-07T08:02:00.000Z",
+    });
+
+    assert.equal(demoted.ok, false);
+    assert.equal(disabled.ok, false);
+    assert.equal(repository.getUserByUsername("admin_only").data.role, "admin");
+    assert.equal(repository.getUserByUsername("admin_only").data.disabledAtIso, null);
   } finally {
     cleanup();
   }

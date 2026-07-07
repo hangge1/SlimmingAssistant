@@ -153,7 +153,7 @@ export default async function SettingsPage() {
                   </div>
                 </div>
               ) : group.title === "用户管理" ? (
-                <UserManagementPanel listError={userListError} users={managedUsers} />
+                <UserManagementPanel currentUserId={auth.userId} listError={userListError} users={managedUsers} />
               ) : group.title === "趋势估算" ? (
                 <TrendThresholdForm initialState={initialTrendThresholdState} />
               ) : group.title === "访问保护" ? (
