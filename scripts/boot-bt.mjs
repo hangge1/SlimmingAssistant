@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const nodeCommand = process.execPath;
+const prepareOnly = process.argv.includes("--prepare-only");
+const passthroughArgs = process.argv.slice(2).filter((arg) => arg !== "--prepare-only");
 
 function resolveRequestedPort() {
   const portFlagIndex = process.argv.findIndex((arg) => arg === "--port" || arg === "-p");
@@ -152,8 +154,13 @@ ensureBetterSqliteAliases();
 console.log("Running database migrations...");
 run(npmCommand, ["run", "db:migrate"]);
 
+if (prepareOnly) {
+  console.log("BT preparation complete. Start the server with npm run start:bt.");
+  process.exit(0);
+}
+
 console.log("Starting production server...");
-const child = spawn(nodeCommand, ["scripts/start-bt.mjs", ...process.argv.slice(2)], {
+const child = spawn(nodeCommand, ["scripts/start-bt.mjs", ...passthroughArgs], {
   cwd: projectRoot,
   env: process.env,
   stdio: "inherit",

@@ -43,7 +43,7 @@ npm install
 
 ### 初始化或迁移数据库
 
-默认数据库路径为 `data/slimming-assistant.sqlite`。应用启动时也会自动执行迁移；如果希望手动迁移，可以运行：
+默认数据库路径为 `data/slimming-assistant.sqlite`。部署准备阶段会执行迁移；如果希望手动迁移，可以运行：
 
 ```bash
 npm run db:migrate
@@ -69,8 +69,9 @@ npm run dev
 npm run dev          # 启动开发服务
 npm run build        # 构建生产版本
 npm run start        # 启动生产服务，默认监听 0.0.0.0:3000
-npm run start:bt     # 宝塔一键启动入口，自动安装生产依赖、迁移数据库并启动
-npm run start:bt:3001 # 宝塔一键启动入口，固定监听 0.0.0.0:3001
+npm run prepare:bt   # 宝塔部署准备：安装生产依赖并迁移数据库，执行完会退出
+npm run start:bt     # 宝塔启动入口，只启动生产服务，默认监听 0.0.0.0:3000
+npm run start:bt:3001 # 宝塔启动入口，固定监听 0.0.0.0:3001
 npm run release      # 本地构建并生成 Linux 服务器发布包
 npm run check        # 依次运行 lint、typecheck 和 test
 npm run lint         # 运行 ESLint
@@ -82,7 +83,9 @@ npm run db:migrate   # 执行数据库迁移
 
 ## 生产部署
 
-推荐在本地或 CI 构建发布包，服务器只负责安装生产依赖、迁移数据库和启动服务。
+推荐在本地或 CI 构建发布包。服务器只负责安装生产依赖、迁移数据库和启动服务，并且要把“部署准备”和“宝塔启动命令”分开执行。
+
+不要把 `npm install`、`npm run build`、`npm run prepare:bt` 放进宝塔启动命令。宝塔会在重启、守护拉起或开机时反复执行启动命令，小内存服务器可能因此被依赖安装或原生模块编译打满，表现为 SSH 无响应。
 
 本地或 CI 执行：
 
@@ -91,17 +94,34 @@ npm install
 npm run release
 ```
 
-上传 `dist/releases/*.tar.gz` 到服务器并解压后，宝塔项目的启动命令只填写一个：
+上传 `dist/releases/*.tar.gz` 到服务器并解压，例如：
+
+```bash
+mkdir -p /www/wwwroot/slimming-assistant
+tar -xzf slimming-assistant-*.tar.gz -C /www/wwwroot/slimming-assistant --strip-components=1
+cd /www/wwwroot/slimming-assistant
+```
+
+首次部署或更新依赖后，在 SSH 里手动执行一次部署准备：
+
+```bash
+npm run prepare:bt
+```
+
+`prepare:bt` 会执行：
+
+- 首次部署或依赖变化时执行 `npm install --omit=dev`
+- 执行 `npm run db:migrate`
+- 准备 Next.js 运行时需要的 `better-sqlite3` alias
+- 执行完成后退出，不会启动长驻服务
+
+然后在宝塔项目的启动命令里只填写：
 
 ```bash
 npm run start:bt:3000
 ```
 
-这个命令会自动完成三件事：
-
-- 首次部署或依赖变化时执行 `npm install --omit=dev`
-- 每次启动前执行 `npm run db:migrate`
-- 启动生产服务并监听 `0.0.0.0:3000`
+这个命令只启动生产服务并监听 `0.0.0.0:3000`，不会安装依赖，也不会执行构建。
 
 如果宝塔无法配置环境变量，并且需要改端口，可以直接使用固定端口脚本：
 
@@ -115,7 +135,45 @@ npm run start:bt:3001
 node scripts/start-bt.mjs --port 3001
 ```
 
-不要把 `npm run build` 放进宝塔启动命令；构建应该在发布包生成阶段完成，避免服务器重启时打满 CPU 和内存。
+### 宝塔部署检查
+
+启动后在服务器上检查：
+
+```bash
+curl http://127.0.0.1:3000
+ss -lntp | grep :3000
+```
+
+如果本机 `curl` 正常但外网打不开，优先检查宝塔反向代理、端口放行、安全组和防火墙。
+
+### SSH 被卡死时的处理
+
+如果误把 `npm run start:bt` 的旧版本或 `npm install` 放进宝塔启动命令，导致 SSH 无响应，先从云厂商控制台的 VNC/救援终端进入服务器，然后执行：
+
+```bash
+pkill -9 -f "npm install"
+pkill -9 -f "boot-bt.mjs"
+pkill -9 -f "start-bt.mjs"
+pkill -9 -f "next start"
+```
+
+再检查资源：
+
+```bash
+top
+free -h
+df -h
+```
+
+小内存服务器建议先加 swap，再执行 `npm run prepare:bt`：
+
+```bash
+fallocate -l 2G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+```
 
 ## 目录结构
 
