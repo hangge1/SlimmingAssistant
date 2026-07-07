@@ -49,7 +49,6 @@ function getSession(guestSessionId: string) {
       goals: [],
       updatedAtMs: now,
     };
-    seedGuestSession(session);
     guestSessions.set(guestSessionId, session);
   }
 
@@ -59,73 +58,6 @@ function getSession(guestSessionId: string) {
 
 export function deleteGuestSession(guestSessionId: string) {
   guestSessions.delete(guestSessionId);
-}
-
-function seedGuestSession(session: GuestSessionData) {
-  const nowIso = new Date().toISOString();
-  const today = new Date();
-  const dates = [6, 4, 2].map((offset) => {
-    const date = new Date(today);
-    date.setDate(date.getDate() - offset);
-    return date.toISOString().slice(0, 10);
-  });
-
-  session.goals.push({
-    id: randomUUID(),
-    userId: "guest",
-    type: "health",
-    targetWeightKg: 72,
-    targetWaistCm: 84,
-    targetHipCm: null,
-    targetBodyFatPercentage: null,
-    weeklyRunCount: null,
-    weeklyDistanceKm: null,
-    createdAtIso: nowIso,
-    updatedAtIso: nowIso,
-  });
-  session.goals.push({
-    id: randomUUID(),
-    userId: "guest",
-    type: "run",
-    targetWeightKg: null,
-    targetWaistCm: null,
-    targetHipCm: null,
-    targetBodyFatPercentage: null,
-    weeklyRunCount: 3,
-    weeklyDistanceKm: 12,
-    createdAtIso: nowIso,
-    updatedAtIso: nowIso,
-  });
-
-  session.healthRecords.push(
-    ...dates.map((localDate, index) => ({
-      id: randomUUID(),
-      userId: "guest",
-      localDate,
-      weightKg: 76.5 - index * 0.4,
-      waistCm: 89 - index * 0.5,
-      hipCm: null,
-      bodyFatPercentage: null,
-      createdAtIso: nowIso,
-      updatedAtIso: nowIso,
-    })),
-  );
-
-  session.runRecords.push(
-    ...dates.slice(1).map((localDate, index) => ({
-      id: randomUUID(),
-      userId: "guest",
-      localDate,
-      distanceKm: 4 + index,
-      durationSeconds: 1800 + index * 240,
-      paceSecondsPerKm: 450,
-      averageHeartRateBpm: 142 + index * 3,
-      averageStrideMeters: null,
-      cadenceSpm: null,
-      createdAtIso: nowIso,
-      updatedAtIso: nowIso,
-    })),
-  );
 }
 
 export function createGuestRecordsRepository(guestSessionId: string) {

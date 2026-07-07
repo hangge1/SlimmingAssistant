@@ -8,6 +8,7 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { createGoalsRepository } from "../features/goals/repositories/goals-repository.ts";
 import { saveHealthGoal } from "../features/goals/services/goals-service.ts";
+import { createGuestGoalsRepository, createGuestRecordsRepository } from "../features/guest/repositories/guest-repositories.ts";
 import { createRecordsRepository } from "../features/records/repositories/records-repository.ts";
 import { saveHealthRecord } from "../features/records/services/records-service.ts";
 import { createReminderRepository } from "../features/reminders/repositories/reminder-repository.ts";
@@ -125,6 +126,16 @@ test("邮件提醒使用个人收件邮箱和全局 SMTP 配置", async () => {
   } finally {
     cleanup();
   }
+});
+
+test("新访客会话不会预置示例数据", () => {
+  const sessionId = `guest-empty-${Date.now()}`;
+  const recordsRepository = createGuestRecordsRepository(sessionId);
+  const goalsRepository = createGuestGoalsRepository(sessionId);
+
+  assert.deepEqual(recordsRepository.listHealthRecords().data, []);
+  assert.deepEqual(recordsRepository.listRunRecords().data, []);
+  assert.deepEqual(goalsRepository.listGoals().data, []);
 });
 
 test("目标按 userId 隔离，同一类型目标互不覆盖", () => {
