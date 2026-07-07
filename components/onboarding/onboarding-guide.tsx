@@ -125,7 +125,13 @@ export function OnboardingGuide() {
 
   useEffect(() => {
     if (window.localStorage.getItem(storageKey) !== "1") {
-      setOpen(true);
+      const timer = window.setTimeout(() => {
+        setOpen(true);
+      }, 0);
+
+      return () => {
+        window.clearTimeout(timer);
+      };
     }
   }, []);
 

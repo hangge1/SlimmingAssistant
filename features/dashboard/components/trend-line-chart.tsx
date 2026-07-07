@@ -22,7 +22,11 @@ const chartPadding = {
 };
 
 function toneColor(tone: DashboardChartMetric["tone"]) {
-  return "var(--primary)";
+  return {
+    health: "var(--primary)",
+    motion: "var(--primary)",
+    warning: "var(--warning)",
+  }[tone];
 }
 
 function parseLocalDate(localDate: string) {

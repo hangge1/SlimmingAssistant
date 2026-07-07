@@ -89,6 +89,8 @@ npm run db:migrate   # 执行数据库迁移
 
 ## 生产部署
 
+完整部署和排障流程见 [部署手册](doc/deployment-manual.md)。这里保留常用部署步骤。
+
 推荐在本地或 CI 构建发布包。服务器只负责安装生产依赖、迁移数据库和启动服务，并且要把“部署准备”和“宝塔启动命令”分开执行。
 
 不要把 `npm install`、`npm run build`、`npm run prepare:bt` 放进宝塔启动命令。宝塔会在重启、守护拉起或开机时反复执行启动命令，小内存服务器可能因此被依赖安装或原生模块编译打满，表现为 SSH 无响应。
@@ -128,6 +130,21 @@ npm run start:bt:3000
 ```
 
 这个命令只启动生产服务并监听 `0.0.0.0:3000`，不会安装依赖，也不会执行构建。
+
+如果宝塔前面启用了 HTTPS 反向代理，推荐在站点的 Nginx 反向代理配置里保留这些请求头，避免 Next.js Server Actions 因 `Origin` 和 `X-Forwarded-Host` 不一致而拒绝提交：
+
+```nginx
+proxy_set_header Host $host;
+proxy_set_header X-Forwarded-Host $host;
+proxy_set_header X-Forwarded-Proto $scheme;
+proxy_set_header X-Forwarded-Port $server_port;
+```
+
+项目的 `start:bt` 入口也会在请求进入 Next.js 前自动去掉 `X-Forwarded-Host` / `Host` 里的默认端口，例如把 `www.hangge.xyz:443` 规范为 `www.hangge.xyz`。如果将来有多个公网域名，构建发布包前可以设置：
+
+```bash
+SERVER_ACTION_ALLOWED_ORIGINS=www.hangge.xyz,hangge.xyz npm run release
+```
 
 如果宝塔无法配置环境变量，并且需要改端口，可以直接使用固定端口脚本：
 
