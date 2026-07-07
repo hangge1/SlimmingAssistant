@@ -43,6 +43,8 @@ const saveSmtpConfigActionSource = readFileSync("features/settings/actions/save-
 const sendTestEmailActionSource = readFileSync("features/settings/actions/send-test-email.ts", "utf8");
 const changeAccessPasswordActionSource = readFileSync("features/access/actions/change-access-password.ts", "utf8");
 const revokeTrustedDeviceActionSource = readFileSync("features/access/actions/revoke-trusted-device.ts", "utf8");
+const createManagedUserActionSource = readFileSync("features/access/actions/create-managed-user.ts", "utf8");
+const userManagementPanelSource = readFileSync("features/access/components/user-management-panel.tsx", "utf8");
 const saveHealthGoalActionSource = readFileSync("features/goals/actions/save-health-goal.ts", "utf8");
 const saveRunGoalActionSource = readFileSync("features/goals/actions/save-run-goal.ts", "utf8");
 
@@ -333,6 +335,17 @@ test("访问保护设置入口受保护并复用 access service", () => {
   assert.match(revokeTrustedDeviceActionSource, /revokeTrustedDevice/);
 });
 
+test("管理员用户管理入口受保护并复用用户服务", () => {
+  assert.match(settingsPageSource, /UserManagementPanel/);
+  assert.match(settingsPageSource, /createUserRepository/);
+  assert.match(settingsPageSource, /group\.title !== "用户管理"/);
+  assert.match(userManagementPanelSource, /createManagedUserAction/);
+  assert.match(createManagedUserActionSource, /requireUserAuthContext/);
+  assert.match(createManagedUserActionSource, /auth\.role !== "admin"/);
+  assert.match(createManagedUserActionSource, /createManagedUser/);
+  assert.doesNotMatch(createManagedUserActionSource, /\.insert\(|\.update\(|\.delete\(/);
+});
+
 test("主要路由可以通过 Next 实际渲染", { timeout: 90_000 }, async () => {
   const port = await getFreePort();
   const baseUrl = `http://127.0.0.1:${port}`;
@@ -461,6 +474,9 @@ test("主要路由可以通过 Next 实际渲染", { timeout: 90_000 }, async ()
         assert.match(html, /新访问密码/);
         assert.match(html, /受信设备/);
         assert.match(html, /移除/);
+        assert.match(html, /用户管理/);
+        assert.match(html, /新增用户/);
+        assert.match(html, /普通用户/);
       }
     }
     const guestHome = await fetch(`${actualBaseUrl}/`, {

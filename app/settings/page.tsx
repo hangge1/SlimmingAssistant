@@ -6,7 +6,9 @@ import {
   createSettingsRepositoryForAuth,
 } from "@/features/access/services/scoped-repositories";
 import { AccessProtectionPanel } from "@/features/access/components/access-protection-panel";
+import { UserManagementPanel } from "@/features/access/components/user-management-panel";
 import { createAccessRepository } from "@/features/access/repositories/access-repository";
+import { createUserRepository } from "@/features/access/repositories/user-repository";
 import { listTrustedDevices } from "@/features/access/services/access-management-service";
 import { ProfileForm } from "@/features/settings/components/profile-form";
 import { ReminderRuleForm } from "@/features/settings/components/reminder-rule-form";
@@ -40,6 +42,11 @@ const settingGroups = [
     items: ["SMTP 主机", "端口", "安全模式", "发件人地址"],
   },
   {
+    title: "用户管理",
+    description: "管理员维护可登录账号，新增用户后各自拥有独立数据空间。",
+    items: ["用户列表", "新增用户", "角色"],
+  },
+  {
     title: "趋势估算",
     description: "配置预计达成时间所需的最低统计天数和最低有效记录数。",
     items: ["最低统计天数", "最低有效记录数"],
@@ -62,6 +69,7 @@ export default async function SettingsPage() {
   const profile = getProfileSettings(repository);
   const reminderRules = getReminderRuleSettings(repository);
   const smtpConfig = isAdmin ? getSmtpConfig(globalSettingsRepository) : null;
+  const userList = isAdmin ? createUserRepository().listUsers() : null;
   const latestEmailReminder = reminderRepository.getLatestEmailReminderEvent();
   const trustedDevices = listTrustedDevices(accessRepository);
   const trendThresholds = getTrendThresholdSettings(repository);
@@ -96,6 +104,17 @@ export default async function SettingsPage() {
       ? `${latestEmailReminder.data.status === "sent" ? "发送成功" : latestEmailReminder.data.status === "failed" ? "发送失败" : latestEmailReminder.data.status === "skipped" ? "已跳过" : "已创建"}：${latestEmailReminder.data.message}`
       : "还没有邮件提醒记录";
   const trustedDeviceList = trustedDevices.ok ? trustedDevices.data : [];
+  const managedUsers =
+    userList?.ok === true
+      ? userList.data.map((user) => ({
+          id: user.id,
+          username: user.username,
+          displayName: user.displayName,
+          role: user.role === "admin" ? ("admin" as const) : ("user" as const),
+          disabledAtIso: user.disabledAtIso,
+        }))
+      : [];
+  const userListError = userList?.ok === false ? userList.error.message : "";
 
   return (
     <AppShell authMode={auth.mode}>
@@ -111,6 +130,7 @@ export default async function SettingsPage() {
         <section aria-label="配置分组" className="workbench-grid workbench-grid--two">
           {settingGroups
             .filter((group) => isAdmin || group.title !== "SMTP 邮件")
+            .filter((group) => isAdmin || group.title !== "用户管理")
             .map((group) => (
             <article className="workbench-card" key={group.title}>
               <div className="mb-3">
@@ -132,6 +152,8 @@ export default async function SettingsPage() {
                     <p className="m-0 mt-1 text-sm text-[var(--ink-secondary)]">{emailReminderStatus}</p>
                   </div>
                 </div>
+              ) : group.title === "用户管理" ? (
+                <UserManagementPanel listError={userListError} users={managedUsers} />
               ) : group.title === "趋势估算" ? (
                 <TrendThresholdForm initialState={initialTrendThresholdState} />
               ) : group.title === "访问保护" ? (

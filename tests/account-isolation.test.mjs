@@ -9,6 +9,9 @@ import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { createGoalsRepository } from "../features/goals/repositories/goals-repository.ts";
 import { saveHealthGoal } from "../features/goals/services/goals-service.ts";
 import { createGuestGoalsRepository, createGuestRecordsRepository } from "../features/guest/repositories/guest-repositories.ts";
+import { createUserRepository } from "../features/access/repositories/user-repository.ts";
+import { createManagedUser } from "../features/access/services/admin-user-service.ts";
+import { verifyAccessPassword } from "../features/access/services/password-hashing.ts";
 import { createRecordsRepository } from "../features/records/repositories/records-repository.ts";
 import { saveHealthRecord } from "../features/records/services/records-service.ts";
 import { createReminderRepository } from "../features/reminders/repositories/reminder-repository.ts";
@@ -136,6 +139,31 @@ test("新访客会话不会预置示例数据", () => {
   assert.deepEqual(recordsRepository.listHealthRecords().data, []);
   assert.deepEqual(recordsRepository.listRunRecords().data, []);
   assert.deepEqual(goalsRepository.listGoals().data, []);
+});
+
+test("管理员可以创建新的登录用户", async () => {
+  const { db, cleanup } = createTempDb();
+
+  try {
+    const repository = createUserRepository(db);
+    const created = await createManagedUser(repository, {
+      username: "user_a",
+      displayName: "用户 A",
+      role: "user",
+      password: "password123",
+      confirmPassword: "password123",
+      nowIso: "2026-07-07T08:00:00.000Z",
+    });
+    const found = repository.getUserByUsername("user_a");
+
+    assert.equal(created.ok, true);
+    assert.equal(found.ok, true);
+    assert.equal(found.ok ? found.data?.displayName : "", "用户 A");
+    assert.equal(found.ok ? found.data?.role : "", "user");
+    assert.equal(found.ok && found.data ? await verifyAccessPassword("password123", found.data.passwordHash) : false, true);
+  } finally {
+    cleanup();
+  }
 });
 
 test("目标按 userId 隔离，同一类型目标互不覆盖", () => {
