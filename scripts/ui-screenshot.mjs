@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { once } from "node:events";
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
@@ -191,6 +191,58 @@ async function waitForServer(baseUrl, child, output) {
   throw new Error(`Next dev server did not become ready.\n${output.join("")}`);
 }
 
+function findBrowserExecutable() {
+  const candidates = [
+    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE,
+    process.env.CHROME_EXECUTABLE,
+  ];
+
+  if (process.platform === "win32") {
+    candidates.push(
+      join(process.env.LOCALAPPDATA ?? "", "Google/Chrome/Application/chrome.exe"),
+      join(process.env.PROGRAMFILES ?? "", "Google/Chrome/Application/chrome.exe"),
+      join(process.env["PROGRAMFILES(X86)"] ?? "", "Google/Chrome/Application/chrome.exe"),
+      join(process.env.LOCALAPPDATA ?? "", "Microsoft/Edge/Application/msedge.exe"),
+      join(process.env.PROGRAMFILES ?? "", "Microsoft/Edge/Application/msedge.exe"),
+      join(process.env["PROGRAMFILES(X86)"] ?? "", "Microsoft/Edge/Application/msedge.exe"),
+    );
+  } else if (process.platform === "darwin") {
+    candidates.push(
+      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+      "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    );
+  } else {
+    candidates.push(
+      "/usr/bin/google-chrome",
+      "/usr/bin/google-chrome-stable",
+      "/usr/bin/chromium",
+      "/usr/bin/chromium-browser",
+      "/usr/bin/microsoft-edge",
+    );
+  }
+
+  return candidates.find((candidate) => candidate && existsSync(candidate));
+}
+
+async function launchBrowser() {
+  try {
+    return await chromium.launch();
+  } catch (error) {
+    if (!/Executable doesn't exist|browserType\.launch/i.test(error.message)) {
+      throw error;
+    }
+
+    const executablePath = findBrowserExecutable();
+    if (!executablePath) {
+      throw error;
+    }
+
+    console.warn(`Playwright 浏览器未安装，改用系统浏览器：${executablePath}`);
+    return chromium.launch({ executablePath });
+  }
+}
+
 async function main() {
   mkdirSync(outputDir, { recursive: true });
 
@@ -214,12 +266,15 @@ async function main() {
 
   try {
     await waitForServer(baseUrl, child, output);
-    browser = await chromium.launch();
+    browser = await launchBrowser();
 
     for (const viewport of viewports) {
       const context = await browser.newContext({
         locale: "zh-CN",
         viewport: { width: viewport.width, height: viewport.height },
+      });
+      await context.addInitScript(() => {
+        window.localStorage.setItem("slimming-assistant-onboarding-seen-v2", "1");
       });
       await context.addCookies([
         {
