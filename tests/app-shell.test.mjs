@@ -44,6 +44,7 @@ const trendLineChartSource = readFileSync("features/dashboard/components/trend-l
 const runRecordFormSource = readFileSync("features/records/components/run-record-form.tsx", "utf8");
 const runRecordEditFormSource = readFileSync("features/records/components/run-record-edit-form.tsx", "utf8");
 const saveProfileActionSource = readFileSync("features/settings/actions/save-profile.ts", "utf8");
+const recipientEmailFormStateSource = readFileSync("features/settings/actions/recipient-email-form-state.ts", "utf8");
 const saveRecipientEmailActionSource = readFileSync("features/settings/actions/save-recipient-email.ts", "utf8");
 const saveTrendThresholdActionSource = readFileSync("features/settings/actions/save-trend-threshold.ts", "utf8");
 const saveReminderRuleActionSource = readFileSync("features/settings/actions/save-reminder-rule.ts", "utf8");
@@ -373,10 +374,12 @@ test("个人资料保存入口受保护并复用 settings service", () => {
 
 test("收件邮箱保存入口受保护并保存到当前用户设置", () => {
   assert.match(settingsPageSource, /邮件接收/);
+  assert.match(recipientEmailFormStateSource, /initialRecipientEmailFormState/);
   assert.match(saveRecipientEmailActionSource, /requireUserAuthContext/);
   assert.match(saveRecipientEmailActionSource, /createSettingsRepositoryForAuth/);
   assert.match(saveRecipientEmailActionSource, /getProfileSettings/);
   assert.match(saveRecipientEmailActionSource, /saveProfileSettings/);
+  assert.doesNotMatch(saveRecipientEmailActionSource, /export const/);
   assert.doesNotMatch(saveRecipientEmailActionSource, /\.insert\(|\.update\(|\.delete\(/);
 });
 

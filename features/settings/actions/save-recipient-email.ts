@@ -5,24 +5,7 @@ import { requireUserAuthContext } from "@/features/access/services/route-guards"
 import { createSettingsRepositoryForAuth } from "@/features/access/services/scoped-repositories";
 import { parseProfileFormValues } from "../services/profile-input.ts";
 import { getProfileSettings, saveProfileSettings } from "../services/profile-settings-service.ts";
-
-export type RecipientEmailFormState = {
-  values: {
-    reminderEmail: string;
-  };
-  fieldErrors: {
-    reminderEmail?: string;
-    form?: string;
-  };
-  successMessage?: string;
-};
-
-export const initialRecipientEmailFormState: RecipientEmailFormState = {
-  values: {
-    reminderEmail: "",
-  },
-  fieldErrors: {},
-};
+import type { RecipientEmailFormState } from "./recipient-email-form-state";
 
 export async function saveRecipientEmailAction(
   _previousState: RecipientEmailFormState,

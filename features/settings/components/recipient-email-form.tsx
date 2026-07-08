@@ -2,11 +2,8 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  initialRecipientEmailFormState,
-  saveRecipientEmailAction,
-  type RecipientEmailFormState,
-} from "../actions/save-recipient-email";
+import { initialRecipientEmailFormState, type RecipientEmailFormState } from "../actions/recipient-email-form-state";
+import { saveRecipientEmailAction } from "../actions/save-recipient-email";
 
 type RecipientEmailFormProps = {
   initialState: RecipientEmailFormState;
