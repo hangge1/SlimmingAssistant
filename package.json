@@ -19,6 +19,7 @@
     "release:with-data": "npm run build && node scripts/create-release-package.mjs --with-data",
     "deploy:cloud": "node scripts/deploy-cloud.mjs",
     "deploy:cloud:skip-release": "node scripts/deploy-cloud.mjs --skip-release",
+    "bt:ensure-project": "node scripts/ensure-bt-node-project.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/migrate-db.mjs",
     "lint": "eslint .",

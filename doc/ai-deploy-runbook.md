@@ -162,6 +162,35 @@ curl -I -X POST https://<your-domain>/access/logout
 
 如果脚本提示缺少 `DEPLOY_HOST` 或 `DEPLOY_USER`，让用户补充服务器地址和 SSH 用户名，然后设置环境变量再执行。
 
+## 宝塔 Node 项目恢复
+
+如果用户说“宝塔项目被删了”“Node 项目列表为空”“重新添加宝塔项目”，优先执行项目内脚本，而不是手工改面板：
+
+```bash
+npm run bt:ensure-project
+```
+
+执行前必须确认并设置：
+
+```bash
+DEPLOY_HOST=<server-host>
+DEPLOY_USER=<ssh-user>
+DEPLOY_PORT=22
+```
+
+常用可选项：
+
+```bash
+DEPLOY_BT_PROJECT_NAME=slimming_assistant
+DEPLOY_BT_DOMAINS=www.hangge.xyz
+DEPLOY_BT_NODE_VERSION=v24.18.0
+DEPLOY_APP_PORT=3000
+DEPLOY_START_SCRIPT=start:bt:3000
+DEPLOY_SQLITE_PATH=/www/wwwroot/slimming-assistant-data/slimming-assistant.sqlite
+```
+
+脚本会调用宝塔面板的 `mod.project.nodejs.nodeMod`，创建或更新 Node 项目记录，并强制把启动命令写成带 `SQLITE_PATH` 的形式，避免应用读到版本目录里的临时数据库。
+
 如果 SSH 提示密码，优先让用户配置 SSH Key。不要把密码写入仓库。
 
 如果用户数据像丢失，检查应用是否使用共享数据库：

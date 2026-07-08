@@ -164,3 +164,45 @@ DEPLOY_KEEP_RELEASES=1 npm run deploy:cloud
 ```
 
 不要把 `npm install`、`npm run build`、`npm run release` 放到宝塔启动命令里。
+
+## 自动创建或修复宝塔 Node 项目
+
+部署脚本默认会在发布完成后执行：
+
+```bash
+npm run bt:ensure-project
+```
+
+这个步骤会通过 SSH 调用宝塔面板自带的 Node 项目模型，自动完成：
+
+1. 在宝塔 Node 项目列表中创建或更新项目。
+2. 项目根目录固定为 `/www/wwwroot/slimming-assistant-current`。
+3. 启动命令固定为 `/usr/bin/env SQLITE_PATH=/www/wwwroot/slimming-assistant-data/slimming-assistant.sqlite npm run start:bt:3000`。
+4. 绑定域名并重写 Nginx 反向代理配置。
+5. 保留已有 SSL 证书配置并重载 Nginx。
+6. 用宝塔项目机制重启 Node 进程。
+
+可配置环境变量：
+
+```bash
+DEPLOY_BT_PROJECT=1
+DEPLOY_BT_PROJECT_NAME=slimming_assistant
+DEPLOY_BT_DOMAINS=www.hangge.xyz
+DEPLOY_BT_NODE_VERSION=v24.18.0
+DEPLOY_BT_RUN_USER=root
+DEPLOY_BT_PACKAGE_MANAGER=npm
+```
+
+如果只是想上传代码，不希望脚本改动宝塔项目记录，可以临时关闭：
+
+```bash
+DEPLOY_BT_PROJECT=0 npm run deploy:cloud
+```
+
+`DEPLOY_RESTART=0` 也会跳过这个步骤，因为宝塔项目修复会重启 Node 进程。
+
+如果你在宝塔面板里手动删除了 Node 项目，但 `/www/wwwroot/slimming-assistant-current` 和发布目录仍在，可以直接执行：
+
+```bash
+npm run bt:ensure-project
+```

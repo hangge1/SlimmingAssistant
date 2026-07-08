@@ -22,9 +22,27 @@ DEPLOY_APP_PORT=3000
 DEPLOY_START_SCRIPT=start:bt:3000
 DEPLOY_RESTART=1
 DEPLOY_KEEP_RELEASES=3
+DEPLOY_BT_PROJECT=1
+DEPLOY_BT_PROJECT_NAME=slimming_assistant
+DEPLOY_BT_DOMAINS=www.hangge.xyz
+DEPLOY_BT_NODE_VERSION=v24.18.0
 ```
 
 After a successful deployment, the script deletes stale uploaded archives and keeps only the latest `DEPLOY_KEEP_RELEASES` version directories matching `slimming-assistant-[0-9]*`. The shared SQLite directory is outside this pattern and must not be deleted.
+
+## BT Node Project Repair
+
+If the BT panel Node project was deleted, run:
+
+```bash
+npm run bt:ensure-project
+```
+
+The script connects over SSH and invokes BT's own Node project model under `/www/server/panel/mod/project/nodejs/nodeMod.py`. It creates or updates the `sites` row, writes the Node vhost config, keeps the existing SSL material when available, and restarts the project with:
+
+```bash
+/usr/bin/env SQLITE_PATH=/www/wwwroot/slimming-assistant-data/slimming-assistant.sqlite npm run start:bt:3000
+```
 
 ## BT Panel Setup
 

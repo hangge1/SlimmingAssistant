@@ -22,6 +22,7 @@ const startScript = process.env.DEPLOY_START_SCRIPT ?? `start:bt:${appPort}`;
 const dataRoot = process.env.DEPLOY_DATA_ROOT ?? `${deployRoot}/slimming-assistant-data`;
 const sqlitePath = process.env.DEPLOY_SQLITE_PATH ?? `${dataRoot}/slimming-assistant.sqlite`;
 const keepReleaseCount = readPositiveIntegerEnv("DEPLOY_KEEP_RELEASES", "3");
+const ensureBtProject = restartApp && process.env.DEPLOY_BT_PROJECT !== "0";
 
 if (!/^\d{2,5}$/.test(appPort)) {
   throw new Error(`DEPLOY_APP_PORT must be a port number, received: ${appPort}`);
@@ -175,6 +176,7 @@ console.log(`Deploy target: ${remote}:${remotePackageRoot}`);
 console.log(`Current link: ${currentLink}`);
 console.log(`SQLite path: ${sqlitePath}`);
 console.log(`Restart app: ${restartApp ? `yes, port ${appPort}` : "no"}`);
+console.log(`Ensure BT project: ${ensureBtProject ? "yes" : "no"}`);
 console.log(`Keep releases: ${keepReleaseCount}`);
 console.log(`Archive: ${archivePath}`);
 
@@ -219,3 +221,7 @@ const remoteCommand = [
 ].join(" && ");
 
 run("ssh", [...sshBaseArgs(), remote, remoteCommand]);
+
+if (ensureBtProject) {
+  run(process.execPath, ["scripts/ensure-bt-node-project.mjs"]);
+}

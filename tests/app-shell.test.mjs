@@ -26,6 +26,7 @@ const buttonSource = readFileSync("components/ui/button.tsx", "utf8");
 const globalsSource = readFileSync("app/globals.css", "utf8");
 const uiScreenshotSource = readFileSync("scripts/ui-screenshot.mjs", "utf8");
 const deployCloudSource = readFileSync("scripts/deploy-cloud.mjs", "utf8");
+const ensureBtNodeProjectSource = readFileSync("scripts/ensure-bt-node-project.mjs", "utf8");
 const packageSource = JSON.parse(readFileSync("package.json", "utf8"));
 const saveHealthRecordActionSource = readFileSync("features/records/actions/save-health-record.ts", "utf8");
 const saveRunRecordActionSource = readFileSync("features/records/actions/save-run-record.ts", "utf8");
@@ -231,6 +232,21 @@ test("cloud deploy cleans old release directories after switching current", () =
   assert.match(deployCloudSource, /slimming-assistant-\*\.tar\.gz/);
   assert.match(deployCloudSource, /slimming-assistant-\[0-9\]\*/);
   assert.match(deployCloudSource, /rm -rf -- "\$old_dir"/);
+});
+
+test("cloud deploy can recreate the Baota Node project", () => {
+  assert.equal(packageSource.scripts["bt:ensure-project"], "node scripts/ensure-bt-node-project.mjs");
+  assert.match(deployCloudSource, /DEPLOY_BT_PROJECT/);
+  assert.match(deployCloudSource, /restartApp && process\.env\.DEPLOY_BT_PROJECT !== "0"/);
+  assert.match(deployCloudSource, /scripts\/ensure-bt-node-project\.mjs/);
+  assert.match(ensureBtNodeProjectSource, /DEPLOY_BT_PROJECT_NAME/);
+  assert.match(ensureBtNodeProjectSource, /slimming_assistant/);
+  assert.match(ensureBtNodeProjectSource, /DEPLOY_BT_DOMAINS/);
+  assert.match(ensureBtNodeProjectSource, /www\.hangge\.xyz/);
+  assert.match(ensureBtNodeProjectSource, /mod\.project\.nodejs\.nodeMod/);
+  assert.match(ensureBtNodeProjectSource, /\/usr\/bin\/env SQLITE_PATH=/);
+  assert.match(ensureBtNodeProjectSource, /start_project\(get\)/);
+  assert.match(ensureBtNodeProjectSource, /nginx -t/);
 });
 
 test("桌面端主内容使用可用宽度，不固定在窄容器中", () => {

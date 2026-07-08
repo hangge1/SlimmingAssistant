@@ -24,6 +24,7 @@ Collect these before running a real deploy:
 - Auth method: existing SSH key, identity file, or user-entered password.
 - Target app port, default `3000`.
 - Release retention, default `DEPLOY_KEEP_RELEASES=3`.
+- BT Node project name/domains if project creation is needed, defaults `DEPLOY_BT_PROJECT_NAME=slimming_assistant` and `DEPLOY_BT_DOMAINS=www.hangge.xyz`.
 
 If the user wants details or troubleshooting, read `references/next-bt-node.md`.
 
@@ -75,7 +76,15 @@ If no release archive exists, continue with the real deploy; it will build one.
 npm run deploy:cloud
 ```
 
-6. Verify:
+6. If the BT Node project was manually deleted or the list is empty, repair it with the project script:
+
+```bash
+npm run bt:ensure-project
+```
+
+The normal deploy command runs this step automatically unless `DEPLOY_BT_PROJECT=0` or `DEPLOY_RESTART=0`.
+
+7. Verify:
 
 ```bash
 ssh <ssh-user>@<server-host> "readlink -f /www/wwwroot/slimming-assistant-current"
@@ -99,6 +108,9 @@ The project deploy script owns these conventions:
 - shared SQLite database: `/www/wwwroot/slimming-assistant-data/slimming-assistant.sqlite`
 - production preparation: `npm run prepare:bt`
 - default restart script: `npm run start:bt:3000`
+- BT project repair script: `npm run bt:ensure-project`
+- default BT project name: `slimming_assistant`
+- default BT domain: `www.hangge.xyz`
 - default release cleanup: keep the latest 3 `slimming-assistant-*` version directories; override with `DEPLOY_KEEP_RELEASES`
 
 Do not manually reimplement these steps unless the script is broken. Fix `scripts/deploy-cloud.mjs` instead.
