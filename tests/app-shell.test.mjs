@@ -44,6 +44,7 @@ const trendLineChartSource = readFileSync("features/dashboard/components/trend-l
 const runRecordFormSource = readFileSync("features/records/components/run-record-form.tsx", "utf8");
 const runRecordEditFormSource = readFileSync("features/records/components/run-record-edit-form.tsx", "utf8");
 const saveProfileActionSource = readFileSync("features/settings/actions/save-profile.ts", "utf8");
+const saveRecipientEmailActionSource = readFileSync("features/settings/actions/save-recipient-email.ts", "utf8");
 const saveTrendThresholdActionSource = readFileSync("features/settings/actions/save-trend-threshold.ts", "utf8");
 const saveReminderRuleActionSource = readFileSync("features/settings/actions/save-reminder-rule.ts", "utf8");
 const saveSmtpConfigActionSource = readFileSync("features/settings/actions/save-smtp-config.ts", "utf8");
@@ -370,6 +371,15 @@ test("个人资料保存入口受保护并复用 settings service", () => {
   assert.doesNotMatch(saveProfileActionSource, /\.insert\(|\.update\(|\.delete\(/);
 });
 
+test("收件邮箱保存入口受保护并保存到当前用户设置", () => {
+  assert.match(settingsPageSource, /邮件接收/);
+  assert.match(saveRecipientEmailActionSource, /requireUserAuthContext/);
+  assert.match(saveRecipientEmailActionSource, /createSettingsRepositoryForAuth/);
+  assert.match(saveRecipientEmailActionSource, /getProfileSettings/);
+  assert.match(saveRecipientEmailActionSource, /saveProfileSettings/);
+  assert.doesNotMatch(saveRecipientEmailActionSource, /\.insert\(|\.update\(|\.delete\(/);
+});
+
 test("趋势阈值保存入口受保护并复用 settings service", () => {
   assert.match(saveTrendThresholdActionSource, /requireUserAuthContext/);
   assert.match(saveTrendThresholdActionSource, /createSettingsRepositoryForAuth/);
@@ -533,7 +543,9 @@ test("主要路由可以通过 Next 实际渲染", { timeout: 90_000 }, async ()
         assert.match(html, /昵称/);
         assert.match(html, /身高/);
         assert.match(html, /厘米/);
+        assert.match(html, /邮件接收/);
         assert.match(html, /提醒收件邮箱/);
+        assert.match(html, /SMTP 发信服务器由管理员统一维护/);
         assert.match(html, /提醒规则/);
         assert.match(html, /每日提醒时间/);
         assert.match(html, /站内提醒/);

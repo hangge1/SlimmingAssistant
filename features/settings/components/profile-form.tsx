@@ -12,7 +12,6 @@ type ProfileFormProps = {
 const fields = [
   { name: "nickname", label: "昵称", unit: "", inputMode: "text" },
   { name: "heightCm", label: "身高", unit: "厘米", inputMode: "decimal" },
-  { name: "reminderEmail", label: "提醒收件邮箱", unit: "", inputMode: "email" },
 ] as const;
 
 export function ProfileForm({ initialState }: ProfileFormProps) {

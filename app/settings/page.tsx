@@ -11,6 +11,7 @@ import { createAccessRepository } from "@/features/access/repositories/access-re
 import { createUserRepository } from "@/features/access/repositories/user-repository";
 import { listTrustedDevices } from "@/features/access/services/access-management-service";
 import { ProfileForm } from "@/features/settings/components/profile-form";
+import { RecipientEmailForm } from "@/features/settings/components/recipient-email-form";
 import { ReminderRuleForm } from "@/features/settings/components/reminder-rule-form";
 import { SmtpConfigForm } from "@/features/settings/components/smtp-config-form";
 import { TrendThresholdForm } from "@/features/settings/components/trend-threshold-form";
@@ -28,8 +29,13 @@ export const dynamic = "force-dynamic";
 const settingGroups = [
   {
     title: "个人资料",
-    description: "维护昵称、身高和提醒收件邮箱。身高会用于后续 BMI 计算。",
-    items: ["昵称", "身高（厘米）", "收件邮箱"],
+    description: "维护昵称和身高。身高会用于后续 BMI 计算。",
+    items: ["昵称", "身高（厘米）"],
+  },
+  {
+    title: "邮件接收",
+    description: "设置当前账号自己的邮件提醒收件邮箱，SMTP 发信配置由管理员统一维护。",
+    items: ["提醒收件邮箱"],
   },
   {
     title: "提醒规则",
@@ -79,6 +85,12 @@ export default async function SettingsPage() {
   const trendThresholdError = !trendThresholds.ok ? (trendThresholds.fieldErrors.form ?? "趋势估算配置读取失败") : "";
   const initialProfileState = {
     values: profileToFormValues(profile.ok ? profile.data : null),
+    fieldErrors: profile.ok ? {} : { form: profileError },
+  };
+  const initialRecipientEmailState = {
+    values: {
+      reminderEmail: initialProfileState.values.reminderEmail,
+    },
     fieldErrors: profile.ok ? {} : { form: profileError },
   };
   const initialTrendThresholdState = {
@@ -139,6 +151,8 @@ export default async function SettingsPage() {
               </div>
               {group.title === "个人资料" ? (
                 <ProfileForm initialState={initialProfileState} />
+              ) : group.title === "邮件接收" ? (
+                <RecipientEmailForm initialState={initialRecipientEmailState} />
               ) : group.title === "提醒规则" ? (
                 <ReminderRuleForm initialState={initialReminderRuleState} />
               ) : group.title === "SMTP 邮件" ? (
