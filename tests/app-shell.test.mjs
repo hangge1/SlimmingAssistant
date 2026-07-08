@@ -18,6 +18,8 @@ const layoutSource = readFileSync("app/layout.tsx", "utf8");
 const pageSource = readFileSync("app/page.tsx", "utf8");
 const topNavSource = readFileSync("components/layout/top-nav.tsx", "utf8");
 const logoutRouteSource = readFileSync("app/access/logout/route.ts", "utf8");
+const verifyAccessPageSource = readFileSync("app/access/verify/page.tsx", "utf8");
+const createAccessPageSource = readFileSync("app/access/create/page.tsx", "utf8");
 const verifyAccessPasswordFormSource = readFileSync("features/access/components/verify-access-password-form.tsx", "utf8");
 const pageTurnControlsSource = readFileSync("components/layout/page-turn-controls.tsx", "utf8");
 const buttonSource = readFileSync("components/ui/button.tsx", "utf8");
@@ -198,6 +200,25 @@ test("导航、按钮和移动端安全区具备基础交互保护", () => {
   assert.match(buttonSource, /type: type \?\? "button"/);
   assert.match(globalsSource, /page-turn-zone:hover/);
   assert.match(globalsSource, /top-nav-scroll/);
+});
+
+test("access pages use a motion background and prominent title treatment", () => {
+  for (const source of [verifyAccessPageSource, createAccessPageSource]) {
+    assert.match(source, /auth-page/);
+    assert.match(source, /auth-motion-scene/);
+    assert.match(source, /auth-runner/);
+    assert.match(source, /auth-lane/);
+    assert.match(source, /auth-brand/);
+    assert.match(source, /auth-title/);
+  }
+
+  assert.match(globalsSource, /\.auth-page::before/);
+  assert.match(globalsSource, /\.auth-page::after/);
+  assert.match(globalsSource, /@keyframes auth-scene-drift/);
+  assert.match(globalsSource, /@keyframes auth-track-flow/);
+  assert.match(globalsSource, /@keyframes auth-runner-pulse/);
+  assert.match(globalsSource, /\.auth-brand\s*{[^}]*font-size:\s*24px/s);
+  assert.match(globalsSource, /\.auth-title\s*{[^}]*font-size:\s*42px/s);
 });
 
 test("桌面端主内容使用可用宽度，不固定在窄容器中", () => {

@@ -39,12 +39,17 @@ export default async function VerifyAccessPasswordPage({ searchParams }: VerifyA
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[var(--surface-base)] px-4 py-8">
-      <section className="card w-full max-w-md p-5">
-        <div className="mb-5">
-          <p className="mb-2 text-sm font-semibold text-[var(--ink-secondary)]">瘦身助手</p>
-          <h1 className="m-0 text-[28px] font-semibold leading-tight text-[var(--ink-primary)]">登录</h1>
-          <p className="mt-2 text-sm text-[var(--ink-secondary)]">
+    <main className="auth-page">
+      <div aria-hidden="true" className="auth-motion-scene">
+        <span className="auth-runner" />
+        <span className="auth-lane auth-lane--one" />
+        <span className="auth-lane auth-lane--two" />
+      </div>
+      <section className="auth-card">
+        <div className="auth-card__header">
+          <p className="auth-brand">跑步瘦身助手</p>
+          <h1 className="auth-title">登录</h1>
+          <p className="auth-description">
             使用账号进入自己的数据空间，或使用访客模式临时体验。
           </p>
         </div>

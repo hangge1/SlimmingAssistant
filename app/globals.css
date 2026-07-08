@@ -407,6 +407,134 @@ textarea:hover {
   transform: scale(0.96);
 }
 
+.auth-page {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    linear-gradient(115deg, rgba(247, 249, 255, 0.88), rgba(221, 236, 249, 0.74)),
+    #eef5fb;
+  padding: 28px 16px;
+}
+
+.auth-page::before {
+  position: absolute;
+  inset: -18%;
+  background:
+    linear-gradient(118deg, rgba(47, 109, 179, 0.2) 0 12%, transparent 12% 28%, rgba(35, 122, 87, 0.14) 28% 38%, transparent 38%),
+    linear-gradient(155deg, transparent 0 42%, rgba(4, 30, 66, 0.08) 42% 48%, transparent 48%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.28) 0 2px, transparent 2px 58px);
+  content: "";
+  transform: translate3d(0, 0, 0) scale(1.04);
+  animation: auth-scene-drift 18s ease-in-out infinite alternate;
+}
+
+.auth-page::after {
+  position: absolute;
+  inset: auto -18% 0;
+  height: 42%;
+  background:
+    repeating-linear-gradient(
+      12deg,
+      rgba(47, 109, 179, 0.18) 0 2px,
+      transparent 2px 38px
+    ),
+    linear-gradient(180deg, transparent, rgba(47, 109, 179, 0.12));
+  content: "";
+  opacity: 0.62;
+  transform: skewY(-7deg) translateY(18%);
+  animation: auth-track-flow 14s linear infinite;
+}
+
+.auth-motion-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.auth-lane,
+.auth-runner {
+  position: absolute;
+  display: block;
+}
+
+.auth-lane {
+  left: 8%;
+  right: 8%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(4, 30, 66, 0.16), transparent);
+  transform: rotate(-10deg);
+}
+
+.auth-lane--one {
+  top: 30%;
+  animation: auth-lane-slide 10s linear infinite;
+}
+
+.auth-lane--two {
+  bottom: 26%;
+  animation: auth-lane-slide 12s linear infinite reverse;
+}
+
+.auth-runner {
+  right: 18%;
+  top: 22%;
+  width: 190px;
+  height: 190px;
+  border-radius: 40% 60% 48% 52%;
+  background:
+    linear-gradient(130deg, transparent 0 36%, rgba(4, 30, 66, 0.16) 37% 41%, transparent 42%),
+    linear-gradient(45deg, transparent 0 44%, rgba(47, 109, 179, 0.2) 45% 50%, transparent 51%),
+    rgba(47, 109, 179, 0.08);
+  box-shadow: 0 28px 70px rgba(47, 109, 179, 0.16);
+  animation: auth-runner-pulse 3.8s ease-in-out infinite;
+}
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 480px);
+  border: 1px solid rgba(47, 109, 179, 0.18);
+  border-radius: 8px;
+  background: rgba(247, 249, 255, 0.88);
+  padding: 30px;
+  box-shadow:
+    0 28px 90px rgba(4, 30, 66, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(18px);
+}
+
+.auth-card__header {
+  margin-bottom: 22px;
+}
+
+.auth-brand {
+  margin: 0;
+  color: var(--primary);
+  font-size: 24px;
+  font-weight: 950;
+  line-height: 1.08;
+}
+
+.auth-title {
+  margin: 8px 0 0;
+  color: var(--ink-primary);
+  font-size: 42px;
+  font-weight: 950;
+  line-height: 1.02;
+}
+
+.auth-description {
+  margin: 10px 0 0;
+  color: var(--ink-secondary);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
 .home-main {
   position: relative;
   width: 100%;
@@ -920,6 +1048,35 @@ textarea:hover {
     padding: 10px 12px 12px;
   }
 
+  .auth-page {
+    place-items: end center;
+    padding: 18px 12px;
+  }
+
+  .auth-card {
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  .auth-brand {
+    font-size: 20px;
+  }
+
+  .auth-title {
+    font-size: 34px;
+  }
+
+  .auth-description {
+    font-size: 14px;
+  }
+
+  .auth-runner {
+    top: 8%;
+    right: 6%;
+    width: 140px;
+    height: 140px;
+  }
+
   .home-content {
     gap: 10px;
   }
@@ -977,6 +1134,47 @@ textarea:hover {
 @media (hover: hover) and (pointer: fine) {
   .page-turn-zone {
     display: flex;
+  }
+}
+
+@keyframes auth-scene-drift {
+  from {
+    transform: translate3d(-1.5%, -1%, 0) scale(1.04);
+  }
+
+  to {
+    transform: translate3d(1.5%, 1%, 0) scale(1.08);
+  }
+}
+
+@keyframes auth-track-flow {
+  from {
+    background-position: 0 0, 0 0;
+  }
+
+  to {
+    background-position: 260px 0, 0 0;
+  }
+}
+
+@keyframes auth-lane-slide {
+  from {
+    transform: translateX(-8%) rotate(-10deg);
+  }
+
+  to {
+    transform: translateX(8%) rotate(-10deg);
+  }
+}
+
+@keyframes auth-runner-pulse {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-8deg) scale(1);
+  }
+
+  50% {
+    transform: translate3d(-8px, 5px, 0) rotate(-5deg) scale(1.035);
   }
 }
 
