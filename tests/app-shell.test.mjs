@@ -157,8 +157,8 @@ test("首页是应用仪表盘，不是营销页面", () => {
   assert.match(pageSource, /HomeMotionBackground/);
   assert.match(pageSource, /getGoalCardState/);
   assert.match(pageSource, /home-card--goal-/);
-  assert.match(pageSource, /目标体重/);
-  assert.match(pageSource, /目标腰围/);
+  assert.match(pageSource, /健康目标/);
+  assert.match(pageSource, /运动目标/);
   assert.match(pageSource, /今日打卡/);
   assert.match(pageSource, /本周跑量/);
   assert.match(pageSource, /累计跑量/);
@@ -183,7 +183,8 @@ test("首页鼠标跟随背景使用轻量运动流线", () => {
   assert.match(globalsSource, /home-track-drift/);
   assert.match(globalsSource, /app-shell-track-flow/);
   assert.match(globalsSource, /\.home-card--goal-unset/);
-  assert.match(globalsSource, /\.home-card--goal-done/);
+  assert.match(globalsSource, /\.home-card--health-goal/);
+  assert.match(globalsSource, /\.home-card--motion-goal/);
   assert.doesNotMatch(homeMotionBackgroundSource, /setState|useState/);
 });
 
@@ -566,8 +567,8 @@ test("主要路由可以通过 Next 实际渲染", { timeout: 90_000 }, async ()
       }
 
       if (path === "/") {
-        assert.match(html, /目标体重/);
-        assert.match(html, /目标腰围/);
+        assert.match(html, /健康目标/);
+        assert.match(html, /运动目标/);
         assert.match(html, /本周跑量/);
         assert.match(html, /累计跑量/);
         assert.match(html, /苏ICP备2026044129号/);

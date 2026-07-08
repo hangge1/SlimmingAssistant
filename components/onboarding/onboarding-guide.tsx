@@ -16,8 +16,8 @@ type TourStep = {
 const tourSteps: TourStep[] = [
   {
     title: "第一步：先设置目标",
-    text: "先设置目标体重和目标腰围。首页会用目标和当前值计算差距，让你知道该往哪里减。",
-    targets: ["[data-tour='goal-weight']", "[data-tour='goal-waist']"],
+    text: "先设置健康目标和运动目标。首页会把身体目标、跑步目标和当前进度放在一起，让你知道下一步该做什么。",
+    targets: ["[data-tour='goal-health']", "[data-tour='goal-run']"],
     placement: "bottom",
   },
   {

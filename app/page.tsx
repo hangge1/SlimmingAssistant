@@ -1,6 +1,6 @@
 ﻿import Link from "next/link";
 import type { ReactNode } from "react";
-import { Activity, CalendarCheck, Flag, Ruler, Route, Scale } from "lucide-react";
+import { Activity, CalendarCheck, Flag, Route, Scale } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { GuestModeNotice } from "@/components/layout/guest-mode-notice";
 import { HomeMotionBackground } from "@/components/layout/home-motion-background";
@@ -16,7 +16,7 @@ import { getTodayLocalDate } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
-type CardTone = "weight" | "measure" | "checkin" | "week" | "total";
+type CardTone = "health-goal" | "motion-goal" | "checkin" | "week" | "total";
 type GoalCardState = "unset" | "pending" | "active" | "done";
 
 type HomeProps = {
@@ -44,6 +44,40 @@ function getGoalCardState(metric?: DashboardFocusMetric): GoalCardState {
   }
 
   if (metric.status === "待记录") {
+    return "pending";
+  }
+
+  return "active";
+}
+
+function getHealthGoalCardState(metrics: DashboardFocusMetric[]): GoalCardState {
+  const states = metrics.map((metric) => getGoalCardState(metric));
+
+  if (states.every((state) => state === "unset")) {
+    return "unset";
+  }
+
+  if (states.every((state) => state === "done")) {
+    return "done";
+  }
+
+  if (states.some((state) => state === "pending")) {
+    return "pending";
+  }
+
+  return "active";
+}
+
+function getRunGoalCardState(status: string): GoalCardState {
+  if (status === "未设置") {
+    return "unset";
+  }
+
+  if (status === "已完成") {
+    return "done";
+  }
+
+  if (status === "待开始") {
     return "pending";
   }
 
@@ -83,28 +117,89 @@ function HomeCard({
   );
 }
 
-function MetricContent({ metric, fallback }: { metric?: DashboardFocusMetric; fallback: string }) {
-  if (!metric) {
-    return (
-      <div className="mt-4">
-        <p className="m-0 text-[34px] font-black leading-none text-[var(--ink-primary)]">暂无</p>
-        <p className="m-0 mt-3 text-sm font-semibold text-[var(--ink-secondary)]">{fallback}</p>
-      </div>
-    );
-  }
+function GoalMetricLine({
+  label,
+  state,
+  value,
+  unit,
+}: {
+  label: string;
+  state: GoalCardState;
+  value: string;
+  unit: string;
+}) {
+  return (
+    <div className={`home-goal-metric home-goal-metric--${state}`}>
+      <span>{label}</span>
+      <strong>
+        {value}
+        {unit ? <small>{unit}</small> : null}
+      </strong>
+    </div>
+  );
+}
 
-  const goalState = getGoalCardState(metric);
+function HealthGoalContent({ metrics }: { metrics: DashboardFocusMetric[] }) {
+  const [weightMetric, measureMetric] = metrics;
+  const state = getHealthGoalCardState(metrics);
 
   return (
     <div className="mt-4">
-      <div className="flex items-end gap-2">
-            <span className="home-card__value">{metric.targetValue}</span>
-        <span className="pb-1 text-sm font-bold text-[var(--ink-secondary)]">{metric.targetUnit}</span>
+      <p className={`home-card__status home-card__status--${state}`}>
+        {state === "unset" ? "待设置" : state === "done" ? "已达成" : state === "pending" ? "待记录" : "进行中"}
+      </p>
+      <div className="home-goal-metrics">
+        <GoalMetricLine
+          label="目标体重"
+          state={getGoalCardState(weightMetric)}
+          unit={weightMetric?.targetUnit ?? ""}
+          value={weightMetric?.targetValue ?? "未设置"}
+        />
+        <GoalMetricLine
+          label="目标腰围"
+          state={getGoalCardState(measureMetric)}
+          unit={measureMetric?.targetUnit ?? ""}
+          value={measureMetric?.targetValue ?? "未设置"}
+        />
       </div>
-      <p className={`home-card__status home-card__status--${goalState}`}>{metric.status}</p>
       <p className="m-0 mt-3 text-sm font-semibold text-[var(--ink-secondary)]">
-        当前 {metric.currentValue}
-        {metric.currentValue === "暂无" ? "" : metric.currentUnit} · {metric.gap}
+        {state === "unset" ? "设置体重和腰围目标后，首页会显示差距。" : `${weightMetric?.gap ?? ""} · ${measureMetric?.gap ?? ""}`}
+      </p>
+    </div>
+  );
+}
+
+function MotionGoalContent({
+  completedCount,
+  completedDistance,
+  status,
+  targetCount,
+  targetDistance,
+}: {
+  completedCount: number;
+  completedDistance: string;
+  status: string;
+  targetCount: number | null;
+  targetDistance: string;
+}) {
+  const state = getRunGoalCardState(status);
+
+  return (
+    <div className="mt-4">
+      <p className={`home-card__status home-card__status--${state}`}>
+        {state === "unset" ? "待设置" : status}
+      </p>
+      <div className="home-goal-metrics">
+        <GoalMetricLine
+          label="每周次数"
+          state={state}
+          unit={targetCount == null ? "" : "次"}
+          value={targetCount == null ? "未设置" : String(targetCount)}
+        />
+        <GoalMetricLine label="每周跑量" state={state} unit={targetDistance === "未设置" ? "" : "公里"} value={targetDistance} />
+      </div>
+      <p className="m-0 mt-3 text-sm font-semibold text-[var(--ink-secondary)]">
+        本周已完成 {completedCount} 次 · {completedDistance} 公里
       </p>
     </div>
   );
@@ -128,6 +223,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const totalRunDistance = allRuns.reduce((sum, record) => sum + record.distanceKm, 0);
   const weightMetric = summary.focusMetrics.find((metric) => metric.label === "目标体重");
   const measureMetric = summary.focusMetrics.find((metric) => metric.label === "目标腰围");
+  const healthGoalMetrics = [weightMetric, measureMetric].filter((metric): metric is DashboardFocusMetric => Boolean(metric));
   const todayDone = summary.todayBattle.status === "已完成";
   const todayStarted = summary.todayBattle.status === "已开始";
   const todayCheckinState = todayDone ? "done" : todayStarted ? "started" : "missing";
@@ -147,27 +243,33 @@ export default async function Home({ searchParams }: HomeProps) {
           ) : null}
           <section className="home-grid" aria-label="跑步瘦身首页入口">
             <HomeCard
-              action="设目标"
-              className={`home-card--goal-${getGoalCardState(weightMetric)}`}
+              action={getHealthGoalCardState(healthGoalMetrics) === "unset" ? "设健康目标" : "调健康目标"}
+              className={`home-card--health-goal home-card--goal-${getHealthGoalCardState(healthGoalMetrics)}`}
               href="/goals"
               icon={<Scale aria-hidden="true" className="size-5" />}
-              label="目标体重"
-              tone="weight"
-              tourId="goal-weight"
+              label="健康目标"
+              tone="health-goal"
+              tourId="goal-health"
             >
-              <MetricContent fallback="设置目标体重后显示差距" metric={weightMetric} />
+              <HealthGoalContent metrics={healthGoalMetrics} />
             </HomeCard>
 
             <HomeCard
-              action="设目标"
-              className={`home-card--goal-${getGoalCardState(measureMetric)}`}
+              action={runGoalUnset ? "设运动目标" : "调运动目标"}
+              className={`home-card--motion-goal home-card--goal-${getRunGoalCardState(summary.runWeek.status)}`}
               href="/goals"
-              icon={<Ruler aria-hidden="true" className="size-5" />}
-              label="目标腰围"
-              tone="measure"
-              tourId="goal-waist"
+              icon={<Flag aria-hidden="true" className="size-5" />}
+              label="运动目标"
+              tone="motion-goal"
+              tourId="goal-run"
             >
-              <MetricContent fallback="设置腰围目标后显示差距" metric={measureMetric} />
+              <MotionGoalContent
+                completedCount={summary.runWeek.completedCount}
+                completedDistance={summary.runWeek.completedDistance}
+                status={summary.runWeek.status}
+                targetCount={summary.runWeek.targetCount}
+                targetDistance={summary.runWeek.targetDistance}
+              />
             </HomeCard>
 
             <HomeCard
