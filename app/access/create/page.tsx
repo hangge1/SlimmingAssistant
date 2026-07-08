@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { AuthMotionBackground } from "@/components/layout/auth-motion-background";
 import type { CreateAccessPasswordState } from "@/features/access/actions/access-form-state";
 import { CreateAccessPasswordForm } from "@/features/access/components/create-access-password-form";
 import { createUserRepository } from "@/features/access/repositories/user-repository";
@@ -33,11 +34,7 @@ export default async function CreateAccessPasswordPage({ searchParams }: CreateA
 
   return (
     <main className="auth-page">
-      <div aria-hidden="true" className="auth-motion-scene">
-        <span className="auth-runner" />
-        <span className="auth-lane auth-lane--one" />
-        <span className="auth-lane auth-lane--two" />
-      </div>
+      <AuthMotionBackground />
       <section className="auth-card">
         <div className="auth-card__header">
           <p className="auth-brand">跑步瘦身助手</p>

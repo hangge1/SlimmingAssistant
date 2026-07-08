@@ -23,6 +23,7 @@ const verifyAccessPageSource = readFileSync("app/access/verify/page.tsx", "utf8"
 const createAccessPageSource = readFileSync("app/access/create/page.tsx", "utf8");
 const loginWelcomeToastSource = readFileSync("components/layout/login-welcome-toast.tsx", "utf8");
 const homeMotionBackgroundSource = readFileSync("components/layout/home-motion-background.tsx", "utf8");
+const authMotionBackgroundSource = readFileSync("components/layout/auth-motion-background.tsx", "utf8");
 const verifyAccessPasswordFormSource = readFileSync("features/access/components/verify-access-password-form.tsx", "utf8");
 const pageTurnControlsSource = readFileSync("components/layout/page-turn-controls.tsx", "utf8");
 const buttonSource = readFileSync("components/ui/button.tsx", "utf8");
@@ -178,6 +179,7 @@ test("首页鼠标跟随背景使用轻量运动流线", () => {
   assert.match(homeMotionBackgroundSource, /--home-pointer-y/);
   assert.match(homeMotionBackgroundSource, /prefers-reduced-motion/);
   assert.match(globalsSource, /\.home-motion-field/);
+  assert.match(globalsSource, /\.home-motion-field\s*{[^}]*position:\s*fixed/s);
   assert.match(globalsSource, /home-track-drift/);
   assert.match(globalsSource, /app-shell-track-flow/);
   assert.match(globalsSource, /\.home-card--goal-unset/);
@@ -234,12 +236,17 @@ test("导航、按钮和移动端安全区具备基础交互保护", () => {
 test("access pages use a motion background and prominent title treatment", () => {
   for (const source of [verifyAccessPageSource, createAccessPageSource]) {
     assert.match(source, /auth-page/);
-    assert.match(source, /auth-motion-scene/);
-    assert.match(source, /auth-runner/);
-    assert.match(source, /auth-lane/);
+    assert.match(source, /AuthMotionBackground/);
     assert.match(source, /auth-brand/);
   }
 
+  assert.match(authMotionBackgroundSource, /auth-motion-scene/);
+  assert.match(authMotionBackgroundSource, /auth-runner/);
+  assert.match(authMotionBackgroundSource, /auth-lane/);
+  assert.match(authMotionBackgroundSource, /pointermove/);
+  assert.match(authMotionBackgroundSource, /pointerdown/);
+  assert.match(authMotionBackgroundSource, /--auth-pointer-x/);
+  assert.match(authMotionBackgroundSource, /--auth-click-x/);
   assert.match(verifyAccessPageSource, /auth-brand--login/);
   assert.doesNotMatch(verifyAccessPageSource, /<h1 className="auth-title">登录<\/h1>/);
   assert.match(createAccessPageSource, /auth-title/);
@@ -248,6 +255,9 @@ test("access pages use a motion background and prominent title treatment", () =>
   assert.match(globalsSource, /@keyframes auth-scene-drift/);
   assert.match(globalsSource, /@keyframes auth-track-flow/);
   assert.match(globalsSource, /@keyframes auth-runner-pulse/);
+  assert.match(globalsSource, /@keyframes auth-click-ripple/);
+  assert.match(globalsSource, /\.auth-motion-scene::before/);
+  assert.match(globalsSource, /\.auth-motion-scene\[data-click="on"\]::after/);
   assert.match(globalsSource, /\.auth-brand\s*{[^}]*font-size:\s*24px/s);
   assert.match(globalsSource, /\.auth-brand--login\s*{[^}]*font-size:\s*34px/s);
   assert.match(globalsSource, /\.auth-card__header\s*{[^}]*text-align:\s*center/s);

@@ -481,10 +481,50 @@ textarea:hover {
 }
 
 .auth-motion-scene {
+  --auth-pointer-x: 68%;
+  --auth-pointer-y: 38%;
+  --auth-click-x: 68%;
+  --auth-click-y: 38%;
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+}
+
+.auth-motion-scene::before,
+.auth-motion-scene::after {
+  position: absolute;
+  display: block;
+  content: "";
+  pointer-events: none;
+}
+
+.auth-motion-scene::before {
+  left: var(--auth-pointer-x);
+  top: var(--auth-pointer-y);
+  width: min(820px, 72vw);
+  height: 132px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, transparent, rgba(47, 109, 179, 0.16), rgba(35, 122, 87, 0.09), transparent);
+  filter: blur(10px);
+  opacity: 0.74;
+  transform: translate(-50%, -50%) rotate(-13deg);
+}
+
+.auth-motion-scene::after {
+  left: var(--auth-click-x);
+  top: var(--auth-click-y);
+  width: 48px;
+  height: 48px;
+  border: 2px solid rgba(47, 109, 179, 0.28);
+  border-radius: 999px;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.35);
+}
+
+.auth-motion-scene[data-click="on"]::after {
+  animation: auth-click-ripple 560ms ease-out both;
 }
 
 .auth-lane,
@@ -497,7 +537,9 @@ textarea:hover {
   left: 8%;
   right: 8%;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(4, 30, 66, 0.16), transparent);
+  background:
+    linear-gradient(90deg, transparent, rgba(4, 30, 66, 0.16), transparent),
+    repeating-linear-gradient(90deg, rgba(47, 109, 179, 0.22) 0 18px, transparent 18px 52px);
   transform: rotate(-10deg);
 }
 
@@ -591,8 +633,8 @@ textarea:hover {
 .home-motion-field {
   --home-pointer-x: 50%;
   --home-pointer-y: 42%;
-  position: absolute;
-  inset: -72px -160px;
+  position: fixed;
+  inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
@@ -611,25 +653,25 @@ textarea:hover {
 .home-motion-field::before {
   inset: 0;
   background:
-    linear-gradient(118deg, transparent 0 28%, rgba(47, 109, 179, 0.075) 28% 31%, transparent 31% 100%),
-    linear-gradient(153deg, transparent 0 52%, rgba(35, 122, 87, 0.065) 52% 55%, transparent 55% 100%);
-  mask-image: radial-gradient(520px 260px at var(--home-pointer-x) var(--home-pointer-y), #000 0 46%, transparent 78%);
-  opacity: 0.78;
+    linear-gradient(115deg, transparent 0 18%, rgba(47, 109, 179, 0.08) 18% 20%, transparent 20% 48%, rgba(35, 122, 87, 0.06) 48% 50%, transparent 50%),
+    repeating-linear-gradient(112deg, rgba(47, 109, 179, 0.055) 0 1px, transparent 1px 54px);
+  mask-image: radial-gradient(720px 360px at var(--home-pointer-x) var(--home-pointer-y), #000 0 44%, transparent 82%);
+  opacity: 0.86;
 }
 
 .home-motion-field::after {
-  left: -10%;
-  right: -10%;
-  bottom: 4%;
-  height: 46%;
+  left: -8vw;
+  right: -8vw;
+  bottom: -3vh;
+  height: 48vh;
   background:
     repeating-linear-gradient(
-      8deg,
-      rgba(47, 109, 179, 0.14) 0 1px,
-      transparent 1px 32px
+      9deg,
+      rgba(47, 109, 179, 0.17) 0 2px,
+      transparent 2px 38px
     ),
-    linear-gradient(180deg, transparent, rgba(47, 109, 179, 0.065));
-  opacity: 0.36;
+    linear-gradient(180deg, transparent, rgba(47, 109, 179, 0.085));
+  opacity: 0.42;
   transform: skewY(-5deg);
   animation: home-track-drift 18s linear infinite;
 }
@@ -637,12 +679,14 @@ textarea:hover {
 .home-motion-field__wake {
   left: var(--home-pointer-x);
   top: var(--home-pointer-y);
-  width: min(760px, 72vw);
-  height: 112px;
+  width: min(980px, 82vw);
+  height: 128px;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent, rgba(47, 109, 179, 0.12), rgba(35, 122, 87, 0.08), transparent);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 28px, rgba(47, 109, 179, 0.09) 28px 30px, transparent 30px 76px),
+    linear-gradient(90deg, transparent, rgba(47, 109, 179, 0.13), rgba(35, 122, 87, 0.08), transparent);
   filter: blur(12px);
-  opacity: 0.64;
+  opacity: 0.7;
   transform: translate(-50%, -50%) rotate(-13deg);
 }
 
@@ -657,10 +701,12 @@ textarea:hover {
 .home-motion-field__marker {
   left: var(--home-pointer-x);
   top: var(--home-pointer-y);
-  width: 132px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(47, 109, 179, 0.28), transparent);
-  opacity: 0.58;
+  width: 180px;
+  height: 3px;
+  background:
+    repeating-linear-gradient(90deg, rgba(47, 109, 179, 0.38) 0 22px, transparent 22px 42px),
+    linear-gradient(90deg, transparent, rgba(47, 109, 179, 0.34), transparent);
+  opacity: 0.68;
   transform: translate(-50%, -50%) rotate(-13deg);
 }
 
@@ -1447,6 +1493,18 @@ textarea:hover {
   }
 }
 
+@keyframes auth-click-ripple {
+  0% {
+    opacity: 0.42;
+    transform: translate(-50%, -50%) scale(0.35);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(4.8);
+  }
+}
+
 @keyframes login-welcome-pop {
   0% {
     opacity: 0;
@@ -1498,7 +1556,8 @@ textarea:hover {
 @media (prefers-reduced-motion: reduce) {
   .app-shell,
   .app-shell::before,
-  .home-motion-field::after {
+  .home-motion-field::after,
+  .auth-motion-scene[data-click="on"]::after {
     animation: none;
   }
 }
