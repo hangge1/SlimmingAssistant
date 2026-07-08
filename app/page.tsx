@@ -100,6 +100,7 @@ export default async function Home() {
   const measureMetric = summary.focusMetrics.find((metric) => metric.label === "目标腰围");
   const todayDone = summary.todayBattle.status === "已完成";
   const todayStarted = summary.todayBattle.status === "已开始";
+  const todayCheckinState = todayDone ? "done" : todayStarted ? "started" : "missing";
   const runGoalUnset = summary.runWeek.status === "未设置";
 
   return (
@@ -137,7 +138,7 @@ export default async function Home() {
 
             <HomeCard
               action="去打卡"
-              className="home-card--wide"
+              className={`home-card--wide home-card--checkin-${todayCheckinState}`}
               href="/records"
               icon={<CalendarCheck aria-hidden="true" className="size-5" />}
               label="今日打卡"
@@ -146,12 +147,12 @@ export default async function Home() {
             >
               <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="m-0 text-[34px] font-black leading-none text-[var(--ink-primary)] max-sm:text-[30px]">
+                  <p className={`today-checkin-status today-checkin-status--${todayCheckinState}`}>
                     {todayDone ? "已完成" : todayStarted ? "已开始" : "未完成"}
                   </p>
                   <p className="m-0 mt-3 text-sm font-semibold text-[var(--ink-secondary)]">{summary.todayBattle.text}</p>
                 </div>
-                <span className="inline-flex w-fit items-center gap-2 rounded-full bg-[rgba(247,249,255,0.12)] px-3 py-2 text-sm font-black text-[var(--ink-primary)]">
+                <span className="today-checkin-action">
                   <Activity aria-hidden="true" className="size-4" />
                   {summary.todayBattle.primaryActionLabel}
                 </span>

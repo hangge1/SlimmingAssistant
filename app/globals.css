@@ -21,6 +21,12 @@
   --warning-soft: rgba(47, 109, 179, 0.08);
   --danger: var(--color-signal);
   --danger-soft: rgba(47, 109, 179, 0.08);
+  --checkin-missing: #b42318;
+  --checkin-missing-soft: rgba(180, 35, 24, 0.11);
+  --checkin-started: #a15c12;
+  --checkin-started-soft: rgba(161, 92, 18, 0.12);
+  --checkin-done: #237a57;
+  --checkin-done-soft: rgba(35, 122, 87, 0.13);
 }
 
 * {
@@ -688,6 +694,51 @@ textarea:hover {
   border-color: rgba(47, 109, 179, 0.24);
 }
 
+.home-card--checkin-missing {
+  background:
+    linear-gradient(135deg, var(--checkin-missing-soft), rgba(247, 249, 255, 0.98) 64%),
+    var(--surface-panel);
+  border-color: rgba(180, 35, 24, 0.34);
+  box-shadow: 0 18px 42px rgba(180, 35, 24, 0.09);
+}
+
+.home-card--checkin-started {
+  background:
+    linear-gradient(135deg, var(--checkin-started-soft), rgba(247, 249, 255, 0.98) 64%),
+    var(--surface-panel);
+  border-color: rgba(161, 92, 18, 0.32);
+  box-shadow: 0 18px 42px rgba(161, 92, 18, 0.08);
+}
+
+.home-card--checkin-done {
+  background:
+    linear-gradient(135deg, var(--checkin-done-soft), rgba(247, 249, 255, 0.98) 64%),
+    var(--surface-panel);
+  border-color: rgba(35, 122, 87, 0.34);
+  box-shadow: 0 18px 42px rgba(35, 122, 87, 0.1);
+}
+
+.home-card--checkin-missing .home-card__icon,
+.home-card--checkin-missing .home-card__action {
+  background: rgba(180, 35, 24, 0.1);
+  color: var(--checkin-missing);
+  box-shadow: inset 0 0 0 1px rgba(180, 35, 24, 0.18);
+}
+
+.home-card--checkin-started .home-card__icon,
+.home-card--checkin-started .home-card__action {
+  background: rgba(161, 92, 18, 0.1);
+  color: var(--checkin-started);
+  box-shadow: inset 0 0 0 1px rgba(161, 92, 18, 0.18);
+}
+
+.home-card--checkin-done .home-card__icon,
+.home-card--checkin-done .home-card__action {
+  background: rgba(35, 122, 87, 0.11);
+  color: var(--checkin-done);
+  box-shadow: inset 0 0 0 1px rgba(35, 122, 87, 0.2);
+}
+
 .home-card--week {
   background: linear-gradient(135deg, rgba(47, 109, 179, 0.06), rgba(247, 249, 255, 0.98));
   border-color: rgba(47, 109, 179, 0.14);
@@ -721,6 +772,54 @@ textarea:hover {
   font-size: 12px;
   font-weight: 900;
   white-space: nowrap;
+}
+
+.today-checkin-status {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.today-checkin-status--missing {
+  color: var(--checkin-missing);
+}
+
+.today-checkin-status--started {
+  color: var(--checkin-started);
+}
+
+.today-checkin-status--done {
+  color: var(--checkin-done);
+}
+
+.today-checkin-action {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  background: rgba(247, 249, 255, 0.64);
+  padding: 8px 12px;
+  color: var(--ink-primary);
+  font-size: 14px;
+  font-weight: 900;
+  box-shadow: inset 0 0 0 1px rgba(4, 30, 66, 0.08);
+}
+
+.home-card--checkin-missing .today-checkin-action {
+  color: var(--checkin-missing);
+  box-shadow: inset 0 0 0 1px rgba(180, 35, 24, 0.16);
+}
+
+.home-card--checkin-started .today-checkin-action {
+  color: var(--checkin-started);
+  box-shadow: inset 0 0 0 1px rgba(161, 92, 18, 0.16);
+}
+
+.home-card--checkin-done .today-checkin-action {
+  color: var(--checkin-done);
+  box-shadow: inset 0 0 0 1px rgba(35, 122, 87, 0.18);
 }
 
 .home-footer {
@@ -848,6 +947,10 @@ textarea:hover {
 
   .home-card__value {
     font-size: 34px;
+  }
+
+  .today-checkin-status {
+    font-size: 30px;
   }
 
   .home-card__action {
