@@ -18,6 +18,17 @@ const identityFile = process.env.DEPLOY_IDENTITY_FILE;
 const sshPort = process.env.DEPLOY_PORT;
 const explicitArchive = process.env.DEPLOY_ARCHIVE;
 
+function resolveLocalCommand(command, commandArgs) {
+  if (process.platform === "win32" && command === "npm") {
+    return {
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", command, ...commandArgs],
+    };
+  }
+
+  return { executable: command, args: commandArgs };
+}
+
 function run(command, commandArgs, options = {}) {
   const printable = [command, ...commandArgs].join(" ");
   console.log(`\n$ ${printable}`);
@@ -26,7 +37,8 @@ function run(command, commandArgs, options = {}) {
     return;
   }
 
-  const result = spawnSync(command, commandArgs, {
+  const { executable, args } = resolveLocalCommand(command, commandArgs);
+  const result = spawnSync(executable, args, {
     cwd: options.cwd ?? projectRoot,
     shell: false,
     stdio: "inherit",
