@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Activity, CalendarCheck, Flag, Ruler, Route, Scale } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { GuestModeNotice } from "@/components/layout/guest-mode-notice";
+import { HomeMotionBackground } from "@/components/layout/home-motion-background";
 import { LoginWelcomeToast } from "@/components/layout/login-welcome-toast";
 import { OnboardingGuide } from "@/components/onboarding/onboarding-guide";
 import { createDashboardSummary, type DashboardFocusMetric } from "@/features/dashboard/services/dashboard-summary";
@@ -16,6 +17,7 @@ import { getTodayLocalDate } from "@/lib/dates";
 export const dynamic = "force-dynamic";
 
 type CardTone = "weight" | "measure" | "checkin" | "week" | "total";
+type GoalCardState = "unset" | "pending" | "active" | "done";
 
 type HomeProps = {
   searchParams?: Promise<{
@@ -30,6 +32,22 @@ function getSafeData<T>(result: { ok: true; data: T } | { ok: false }) {
 function formatNumber(value: number) {
   const rounded = Math.round(value * 10) / 10;
   return Number.isInteger(rounded) ? String(rounded) : String(rounded);
+}
+
+function getGoalCardState(metric?: DashboardFocusMetric): GoalCardState {
+  if (!metric || metric.status === "未设置") {
+    return "unset";
+  }
+
+  if (metric.status === "已达成") {
+    return "done";
+  }
+
+  if (metric.status === "待记录") {
+    return "pending";
+  }
+
+  return "active";
 }
 
 function HomeCard({
@@ -75,12 +93,15 @@ function MetricContent({ metric, fallback }: { metric?: DashboardFocusMetric; fa
     );
   }
 
+  const goalState = getGoalCardState(metric);
+
   return (
     <div className="mt-4">
       <div className="flex items-end gap-2">
             <span className="home-card__value">{metric.targetValue}</span>
         <span className="pb-1 text-sm font-bold text-[var(--ink-secondary)]">{metric.targetUnit}</span>
       </div>
+      <p className={`home-card__status home-card__status--${goalState}`}>{metric.status}</p>
       <p className="m-0 mt-3 text-sm font-semibold text-[var(--ink-secondary)]">
         当前 {metric.currentValue}
         {metric.currentValue === "暂无" ? "" : metric.currentUnit} · {metric.gap}
@@ -115,6 +136,7 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <AppShell authMode={auth.mode}>
       <main className="home-main">
+        <HomeMotionBackground />
         {welcomeName ? <LoginWelcomeToast name={welcomeName} /> : null}
         <OnboardingGuide />
         <div className="home-content">
@@ -126,6 +148,7 @@ export default async function Home({ searchParams }: HomeProps) {
           <section className="home-grid" aria-label="跑步瘦身首页入口">
             <HomeCard
               action="设目标"
+              className={`home-card--goal-${getGoalCardState(weightMetric)}`}
               href="/goals"
               icon={<Scale aria-hidden="true" className="size-5" />}
               label="目标体重"
@@ -137,6 +160,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
             <HomeCard
               action="设目标"
+              className={`home-card--goal-${getGoalCardState(measureMetric)}`}
               href="/goals"
               icon={<Ruler aria-hidden="true" className="size-5" />}
               label="目标腰围"

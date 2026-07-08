@@ -102,8 +102,40 @@ textarea:hover {
 }
 
 .app-shell {
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
   min-height: 100vh;
   display: block;
+  background:
+    linear-gradient(118deg, rgba(247, 249, 255, 0.6), rgba(233, 241, 250, 0.42)),
+    repeating-linear-gradient(
+      112deg,
+      rgba(47, 109, 179, 0.045) 0 1px,
+      transparent 1px 42px
+    ),
+    linear-gradient(180deg, rgba(47, 109, 179, 0.035), transparent 360px);
+  background-size: auto, 260px 260px, auto;
+  animation: app-shell-track-flow 28s linear infinite;
+}
+
+.app-shell::before {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(122deg, transparent 0 20%, rgba(47, 109, 179, 0.07) 20% 22%, transparent 22% 52%, rgba(35, 122, 87, 0.055) 52% 54%, transparent 54%),
+    linear-gradient(156deg, transparent 0 62%, rgba(4, 30, 66, 0.045) 62% 64%, transparent 64%),
+    repeating-linear-gradient(112deg, rgba(255, 255, 255, 0.2) 0 1px, transparent 1px 56px);
+  opacity: 0.76;
+  transform: translate3d(0, 0, 0);
+  animation: app-shell-stride 22s ease-in-out infinite alternate;
+}
+
+.app-shell > * {
+  position: relative;
+  z-index: 1;
 }
 
 .top-nav-scroll {
@@ -544,6 +576,8 @@ textarea:hover {
 
 .home-main {
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
   width: 100%;
   min-height: calc(100vh - 112px);
   max-width: 1120px;
@@ -554,7 +588,85 @@ textarea:hover {
   padding: 30px 24px 22px;
 }
 
+.home-motion-field {
+  --home-pointer-x: 50%;
+  --home-pointer-y: 42%;
+  position: absolute;
+  inset: -72px -160px;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.home-motion-field::before,
+.home-motion-field::after,
+.home-motion-field__wake,
+.home-motion-field__marker {
+  position: absolute;
+  display: block;
+  content: "";
+  pointer-events: none;
+}
+
+.home-motion-field::before {
+  inset: 0;
+  background:
+    linear-gradient(118deg, transparent 0 28%, rgba(47, 109, 179, 0.075) 28% 31%, transparent 31% 100%),
+    linear-gradient(153deg, transparent 0 52%, rgba(35, 122, 87, 0.065) 52% 55%, transparent 55% 100%);
+  mask-image: radial-gradient(520px 260px at var(--home-pointer-x) var(--home-pointer-y), #000 0 46%, transparent 78%);
+  opacity: 0.78;
+}
+
+.home-motion-field::after {
+  left: -10%;
+  right: -10%;
+  bottom: 4%;
+  height: 46%;
+  background:
+    repeating-linear-gradient(
+      8deg,
+      rgba(47, 109, 179, 0.14) 0 1px,
+      transparent 1px 32px
+    ),
+    linear-gradient(180deg, transparent, rgba(47, 109, 179, 0.065));
+  opacity: 0.36;
+  transform: skewY(-5deg);
+  animation: home-track-drift 18s linear infinite;
+}
+
+.home-motion-field__wake {
+  left: var(--home-pointer-x);
+  top: var(--home-pointer-y);
+  width: min(760px, 72vw);
+  height: 112px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(47, 109, 179, 0.12), rgba(35, 122, 87, 0.08), transparent);
+  filter: blur(12px);
+  opacity: 0.64;
+  transform: translate(-50%, -50%) rotate(-13deg);
+}
+
+.home-motion-field__wake--two {
+  width: min(520px, 58vw);
+  height: 72px;
+  background: linear-gradient(90deg, transparent, rgba(4, 30, 66, 0.08), transparent);
+  opacity: 0.38;
+  transform: translate(-54%, -46%) rotate(10deg);
+}
+
+.home-motion-field__marker {
+  left: var(--home-pointer-x);
+  top: var(--home-pointer-y);
+  width: 132px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(47, 109, 179, 0.28), transparent);
+  opacity: 0.58;
+  transform: translate(-50%, -50%) rotate(-13deg);
+}
+
 .home-content {
+  position: relative;
+  z-index: 1;
   width: 100%;
   align-self: center;
   display: grid;
@@ -856,6 +968,70 @@ textarea:hover {
   border-color: rgba(47, 109, 179, 0.16);
 }
 
+.home-card.home-card--goal-unset {
+  background:
+    linear-gradient(135deg, rgba(161, 92, 18, 0.18), rgba(247, 249, 255, 0.98) 62%),
+    var(--surface-panel);
+  border-color: rgba(161, 92, 18, 0.32);
+  box-shadow:
+    inset 4px 0 0 rgba(161, 92, 18, 0.62),
+    0 18px 42px rgba(161, 92, 18, 0.08);
+}
+
+.home-card.home-card--goal-pending {
+  background:
+    linear-gradient(135deg, rgba(47, 109, 179, 0.12), rgba(247, 249, 255, 0.98) 64%),
+    var(--surface-panel);
+  border-color: rgba(47, 109, 179, 0.24);
+}
+
+.home-card.home-card--goal-active {
+  background:
+    linear-gradient(135deg, rgba(47, 109, 179, 0.14), rgba(247, 249, 255, 0.98) 64%),
+    var(--surface-panel);
+  border-color: rgba(47, 109, 179, 0.3);
+  box-shadow:
+    inset 4px 0 0 rgba(47, 109, 179, 0.52),
+    0 18px 42px rgba(47, 109, 179, 0.09);
+}
+
+.home-card.home-card--goal-done {
+  background:
+    linear-gradient(135deg, rgba(35, 122, 87, 0.14), rgba(247, 249, 255, 0.98) 64%),
+    var(--surface-panel);
+  border-color: rgba(35, 122, 87, 0.34);
+  box-shadow:
+    inset 4px 0 0 rgba(35, 122, 87, 0.56),
+    0 18px 42px rgba(35, 122, 87, 0.1);
+}
+
+.home-card.home-card--goal-unset .home-card__value {
+  color: var(--checkin-started);
+}
+
+.home-card.home-card--goal-active .home-card__value,
+.home-card.home-card--goal-pending .home-card__value {
+  color: var(--primary);
+}
+
+.home-card.home-card--goal-done .home-card__value {
+  color: var(--checkin-done);
+}
+
+.home-card.home-card--goal-unset .home-card__icon,
+.home-card.home-card--goal-unset .home-card__action {
+  background: rgba(161, 92, 18, 0.1);
+  color: var(--checkin-started);
+  box-shadow: inset 0 0 0 1px rgba(161, 92, 18, 0.18);
+}
+
+.home-card.home-card--goal-done .home-card__icon,
+.home-card.home-card--goal-done .home-card__action {
+  background: rgba(35, 122, 87, 0.11);
+  color: var(--checkin-done);
+  box-shadow: inset 0 0 0 1px rgba(35, 122, 87, 0.2);
+}
+
 .home-card--checkin {
   background: linear-gradient(135deg, rgba(47, 109, 179, 0.12), rgba(247, 249, 255, 0.98));
   border-color: rgba(47, 109, 179, 0.24);
@@ -941,6 +1117,37 @@ textarea:hover {
   white-space: nowrap;
 }
 
+.home-card__status {
+  width: fit-content;
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  margin: 12px 0 0;
+  border-radius: 999px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.home-card__status--unset {
+  background: rgba(161, 92, 18, 0.1);
+  color: var(--checkin-started);
+  box-shadow: inset 0 0 0 1px rgba(161, 92, 18, 0.18);
+}
+
+.home-card__status--pending,
+.home-card__status--active {
+  background: rgba(47, 109, 179, 0.1);
+  color: var(--primary);
+  box-shadow: inset 0 0 0 1px rgba(47, 109, 179, 0.18);
+}
+
+.home-card__status--done {
+  background: rgba(35, 122, 87, 0.12);
+  color: var(--checkin-done);
+  box-shadow: inset 0 0 0 1px rgba(35, 122, 87, 0.2);
+}
+
 .today-checkin-status {
   margin: 0;
   font-size: 34px;
@@ -990,6 +1197,8 @@ textarea:hover {
 }
 
 .home-footer {
+  position: relative;
+  z-index: 1;
   width: 100%;
   padding-top: 18px;
   border-top: 1px solid var(--border-soft);
@@ -1085,6 +1294,16 @@ textarea:hover {
     min-height: calc(100vh - 102px);
     gap: 12px;
     padding: 10px 12px 12px;
+  }
+
+  .home-motion-field {
+    inset: -32px -80px;
+  }
+
+  .home-motion-field__wake {
+    width: 88vw;
+    height: 78px;
+    opacity: 0.42;
   }
 
   .auth-page {
@@ -1243,6 +1462,44 @@ textarea:hover {
   100% {
     opacity: 0;
     transform: translate(-50%, -10px);
+  }
+}
+
+@keyframes home-track-drift {
+  from {
+    background-position: 0 0, 0 0;
+  }
+
+  to {
+    background-position: 280px 0, 0 0;
+  }
+}
+
+@keyframes app-shell-track-flow {
+  from {
+    background-position: 0 0, 0 0, 0 0;
+  }
+
+  to {
+    background-position: 0 0, 320px 0, 0 0;
+  }
+}
+
+@keyframes app-shell-stride {
+  from {
+    transform: translate3d(-1.2%, -0.6%, 0) scale(1.02);
+  }
+
+  to {
+    transform: translate3d(1.2%, 0.6%, 0) scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell,
+  .app-shell::before,
+  .home-motion-field::after {
+    animation: none;
   }
 }
 

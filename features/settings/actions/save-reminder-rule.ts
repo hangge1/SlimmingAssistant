@@ -12,8 +12,12 @@ import { saveReminderRuleSettings } from "../services/reminder-rule-settings-ser
 import { reminderRuleToFormValues, type ReminderRuleFormState } from "./reminder-rule-form-state";
 
 function formDataToValues(formData: FormData) {
+  const reminderTime = String(formData.get("reminderTime") ?? "").trim();
+  const reminderHour = String(formData.get("reminderHour") ?? "").trim();
+  const reminderMinute = String(formData.get("reminderMinute") ?? "").trim();
+
   return {
-    reminderTime: String(formData.get("reminderTime") ?? ""),
+    reminderTime: reminderTime || `${reminderHour}:${reminderMinute}`,
     inAppEnabled: formData.get("inAppEnabled") === "on" ? "on" : "",
     emailEnabled: formData.get("emailEnabled") === "on" ? "on" : "",
   };
