@@ -47,8 +47,7 @@ export default async function VerifyAccessPasswordPage({ searchParams }: VerifyA
       </div>
       <section className="auth-card">
         <div className="auth-card__header">
-          <p className="auth-brand">跑步瘦身助手</p>
-          <h1 className="auth-title">登录</h1>
+          <h1 className="auth-brand auth-brand--login">跑步瘦身助手</h1>
           <p className="auth-description">
             使用账号进入自己的数据空间，或使用访客模式临时体验。
           </p>

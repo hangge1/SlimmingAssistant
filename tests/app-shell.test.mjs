@@ -220,15 +220,18 @@ test("access pages use a motion background and prominent title treatment", () =>
     assert.match(source, /auth-runner/);
     assert.match(source, /auth-lane/);
     assert.match(source, /auth-brand/);
-    assert.match(source, /auth-title/);
   }
 
+  assert.match(verifyAccessPageSource, /auth-brand--login/);
+  assert.doesNotMatch(verifyAccessPageSource, /<h1 className="auth-title">登录<\/h1>/);
+  assert.match(createAccessPageSource, /auth-title/);
   assert.match(globalsSource, /\.auth-page::before/);
   assert.match(globalsSource, /\.auth-page::after/);
   assert.match(globalsSource, /@keyframes auth-scene-drift/);
   assert.match(globalsSource, /@keyframes auth-track-flow/);
   assert.match(globalsSource, /@keyframes auth-runner-pulse/);
   assert.match(globalsSource, /\.auth-brand\s*{[^}]*font-size:\s*24px/s);
+  assert.match(globalsSource, /\.auth-brand--login\s*{[^}]*font-size:\s*34px/s);
   assert.match(globalsSource, /\.auth-card__header\s*{[^}]*text-align:\s*center/s);
   assert.match(globalsSource, /\.auth-title\s*{[^}]*font-size:\s*42px/s);
   assert.match(globalsSource, /\.auth-title\s*{[^}]*text-align:\s*center/s);

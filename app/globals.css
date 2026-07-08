@@ -520,6 +520,11 @@ textarea:hover {
   line-height: 1.08;
 }
 
+.auth-brand--login {
+  color: var(--ink-primary);
+  font-size: 34px;
+}
+
 .auth-title {
   margin: 8px 0 0;
   color: var(--ink-primary);
@@ -1094,6 +1099,10 @@ textarea:hover {
 
   .auth-brand {
     font-size: 20px;
+  }
+
+  .auth-brand--login {
+    font-size: 28px;
   }
 
   .auth-title {
