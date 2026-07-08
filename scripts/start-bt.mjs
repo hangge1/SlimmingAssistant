@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -33,6 +34,7 @@ process.env.NODE_ENV = "production";
 process.env.NEXT_TELEMETRY_DISABLED ??= "1";
 process.env.SECURE_COOKIES ??= "false";
 process.env.PORT = port;
+process.env.INTERNAL_REMINDER_TOKEN ??= randomBytes(32).toString("hex");
 
 if (!existsSync(buildIdPath)) {
   console.error("");
@@ -60,6 +62,73 @@ const app = next({
 });
 const handle = app.getRequestHandler();
 let upgradeHandler;
+let reminderInterval;
+let reminderInitialTimer;
+let reminderInFlight = false;
+
+function readReminderIntervalMs() {
+  const parsed = Number(process.env.REMINDER_CHECK_INTERVAL_MS ?? "60000");
+  return Number.isInteger(parsed) && parsed >= 10_000 ? parsed : 60_000;
+}
+
+async function runReminderTick(reason) {
+  if (reminderInFlight) {
+    return;
+  }
+
+  reminderInFlight = true;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 55_000);
+
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/api/reminders/run`, {
+      method: "POST",
+      headers: {
+        "x-internal-reminder-token": process.env.INTERNAL_REMINDER_TOKEN,
+      },
+      signal: controller.signal,
+    });
+    const text = await response.text();
+
+    if (!response.ok) {
+      console.error(`Reminder check failed during ${reason}: ${response.status} ${text}`);
+      return;
+    }
+
+    try {
+      const body = JSON.parse(text);
+      if (body?.data?.failed > 0) {
+        console.warn(`Reminder check completed with failures during ${reason}: ${text}`);
+      }
+    } catch {
+      // Non-JSON response still means the request completed successfully.
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Reminder check failed during ${reason}: ${message}`);
+  } finally {
+    clearTimeout(timeout);
+    reminderInFlight = false;
+  }
+}
+
+function startReminderScheduler() {
+  if (process.env.REMINDER_CHECK_DISABLED === "1") {
+    console.log("Reminder scheduler disabled by REMINDER_CHECK_DISABLED=1");
+    return;
+  }
+
+  const intervalMs = readReminderIntervalMs();
+  reminderInitialTimer = setTimeout(() => {
+    void runReminderTick("startup");
+  }, 5_000);
+  reminderInterval = setInterval(() => {
+    void runReminderTick("interval");
+  }, intervalMs);
+  reminderInitialTimer.unref?.();
+  reminderInterval.unref?.();
+  console.log(`Reminder scheduler enabled every ${intervalMs}ms`);
+}
 
 const server = createServer(async (req, res) => {
   normalizeForwardedHostHeaders(req.headers);
@@ -88,10 +157,13 @@ upgradeHandler = app.getUpgradeHandler();
 
 server.listen(portNumber, hostname, () => {
   console.log(`SlimmingAssistant started on http://${hostname}:${port}`);
+  startReminderScheduler();
 });
 
 async function shutdown(signal) {
   console.log(`Received ${signal}, shutting down...`);
+  clearTimeout(reminderInitialTimer);
+  clearInterval(reminderInterval);
   server.close(async () => {
     await app.close();
     process.exit(0);

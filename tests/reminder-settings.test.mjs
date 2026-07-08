@@ -7,8 +7,11 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 
+import { createUserRepository } from "../features/access/repositories/user-repository.ts";
+import { DEFAULT_ADMIN_USER_ID } from "../features/access/services/auth-context.ts";
 import { createRecordsRepository } from "../features/records/repositories/records-repository.ts";
 import { createReminderRepository } from "../features/reminders/repositories/reminder-repository.ts";
+import { runReminderChecksForActiveUsers } from "../features/reminders/services/reminder-scheduler.ts";
 import { runReminderCheck } from "../features/reminders/services/reminder-runner.ts";
 import { createSettingsRepository } from "../features/settings/repositories/settings-repository.ts";
 import { saveProfileSettings } from "../features/settings/services/profile-settings-service.ts";
@@ -26,6 +29,7 @@ function createTempRepositories() {
   migrate(db, { migrationsFolder: "./db/migrations" });
 
   return {
+    db,
     recordsRepository: createRecordsRepository(db),
     reminderRepository: createReminderRepository(db),
     settingsRepository: createSettingsRepository(db),
@@ -147,6 +151,89 @@ test("ReminderRunner 会发送邮件提醒并记录成功状态", async () => {
 
     assert.equal(sent.ok, true);
     assert.equal(sqlite.prepare("select status from reminder_events where channel = 'email'").get().status, "sent");
+  } finally {
+    cleanup();
+  }
+});
+
+test("ReminderScheduler 会按启用用户执行并使用管理员 SMTP 配置", async () => {
+  const { db, sqlite, cleanup } = createTempRepositories();
+
+  try {
+    const userRepository = createUserRepository(db);
+    const nowIso = "2026-06-26T00:00:00.000Z";
+    const activeUser = userRepository.createUser({
+      username: "active",
+      displayName: "Active",
+      role: "user",
+      passwordHash: "hash",
+      passwordHashAlgorithm: "test",
+      nowIso,
+    });
+    const disabledUser = userRepository.createUser({
+      username: "disabled",
+      displayName: "Disabled",
+      role: "user",
+      passwordHash: "hash",
+      passwordHashAlgorithm: "test",
+      nowIso,
+    });
+
+    assert.equal(activeUser.ok, true);
+    assert.equal(disabledUser.ok, true);
+    userRepository.disableUser(disabledUser.ok ? disabledUser.data.id : "", nowIso);
+
+    const globalSettings = createSettingsRepository(db, DEFAULT_ADMIN_USER_ID);
+    saveSmtpConfig(globalSettings, {
+      host: "smtp.global.example.com",
+      port: 465,
+      username: "smtp-user",
+      password: "smtp-secret",
+      fromEmail: "admin@example.com",
+      secureMode: "ssl",
+      nowIso,
+    });
+
+    for (const user of [activeUser.ok ? activeUser.data : null, disabledUser.ok ? disabledUser.data : null]) {
+      assert.ok(user);
+      const userSettings = createSettingsRepository(db, user.id);
+      saveReminderRuleSettings(userSettings, {
+        reminderTime: "20:30",
+        inAppEnabled: false,
+        emailEnabled: true,
+        nowIso,
+      });
+      saveProfileSettings(userSettings, {
+        nickname: "",
+        heightCm: null,
+        reminderEmail: `${user.username}@example.com`,
+        nowIso,
+      });
+    }
+
+    const sentTo = [];
+    const result = await runReminderChecksForActiveUsers({
+      appDb: db,
+      now: new Date("2026-06-26T13:00:00.000Z"),
+      timeZone: "Asia/Shanghai",
+      mailTransportFactory(config) {
+        assert.equal(config.host, "smtp.global.example.com");
+        return {
+          async sendMail(input) {
+            sentTo.push(input.to);
+            return { messageId: "mail-id" };
+          },
+        };
+      },
+    });
+
+    assert.equal(result.ok, true);
+    assert.deepEqual(sentTo, ["active@example.com"]);
+    assert.equal(sqlite.prepare("select count(*) as count from reminder_events where channel = 'email'").get().count, 1);
+    assert.equal(
+      sqlite.prepare("select user_id from reminder_events where channel = 'email'").get().user_id,
+      activeUser.ok ? activeUser.data.id : "",
+    );
   } finally {
     cleanup();
   }

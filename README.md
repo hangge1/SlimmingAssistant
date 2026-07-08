@@ -131,6 +131,24 @@ npm run start:bt:3000
 
 这个命令只启动生产服务并监听 `0.0.0.0:3000`，不会安装依赖，也不会执行构建。
 
+### 邮件提醒自动任务
+
+生产环境必须通过 `npm run start:bt` 或 `npm run start:bt:3000` 启动，邮件提醒才会自动执行。启动脚本会在进程内生成 `INTERNAL_REMINDER_TOKEN`，每分钟调用一次受保护的内部接口 `/api/reminders/run`，逐个检查未停用用户的提醒规则。
+
+邮件提醒发送逻辑：
+
+- 管理员在“设置 -> SMTP 邮件”维护全局发信服务器。
+- 每个用户在“设置 -> 邮件接收”维护自己的提醒收件邮箱，并可点击“发送测试邮件”验证。
+- 用户开启“提醒规则 -> 邮件提醒”后，到达提醒时间且当天健康记录或跑步记录缺失时，后台任务会发送提醒邮件。
+
+可选环境变量：
+
+```bash
+REMINDER_CHECK_INTERVAL_MS=60000   # 默认每 60 秒检查一次，最小 10000
+REMINDER_TIME_ZONE=Asia/Shanghai   # 默认按中国时区计算提醒日期和时间
+REMINDER_CHECK_DISABLED=1          # 临时关闭后台提醒检查
+```
+
 如果宝塔前面启用了 HTTPS 反向代理，推荐在站点的 Nginx 反向代理配置里保留这些请求头，避免 Next.js Server Actions 因 `Origin` 和 `X-Forwarded-Host` 不一致而拒绝提交：
 
 ```nginx

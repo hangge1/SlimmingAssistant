@@ -15,3 +15,15 @@ export const initialRecipientEmailFormState: RecipientEmailFormState = {
   },
   fieldErrors: {},
 };
+
+export type RecipientEmailTestFormState = {
+  fieldErrors: {
+    reminderEmail?: string;
+    form?: string;
+  };
+  successMessage?: string;
+};
+
+export const initialRecipientEmailTestFormState: RecipientEmailTestFormState = {
+  fieldErrors: {},
+};

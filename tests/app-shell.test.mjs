@@ -29,6 +29,9 @@ const globalsSource = readFileSync("app/globals.css", "utf8");
 const uiScreenshotSource = readFileSync("scripts/ui-screenshot.mjs", "utf8");
 const deployCloudSource = readFileSync("scripts/deploy-cloud.mjs", "utf8");
 const ensureBtNodeProjectSource = readFileSync("scripts/ensure-bt-node-project.mjs", "utf8");
+const startBtSource = readFileSync("scripts/start-bt.mjs", "utf8");
+const reminderRunRouteSource = readFileSync("app/api/reminders/run/route.ts", "utf8");
+const reminderSchedulerSource = readFileSync("features/reminders/services/reminder-scheduler.ts", "utf8");
 const packageSource = JSON.parse(readFileSync("package.json", "utf8"));
 const saveHealthRecordActionSource = readFileSync("features/records/actions/save-health-record.ts", "utf8");
 const saveRunRecordActionSource = readFileSync("features/records/actions/save-run-record.ts", "utf8");
@@ -46,6 +49,8 @@ const runRecordEditFormSource = readFileSync("features/records/components/run-re
 const saveProfileActionSource = readFileSync("features/settings/actions/save-profile.ts", "utf8");
 const recipientEmailFormStateSource = readFileSync("features/settings/actions/recipient-email-form-state.ts", "utf8");
 const saveRecipientEmailActionSource = readFileSync("features/settings/actions/save-recipient-email.ts", "utf8");
+const sendRecipientTestEmailActionSource = readFileSync("features/settings/actions/send-recipient-test-email.ts", "utf8");
+const recipientEmailFormSource = readFileSync("features/settings/components/recipient-email-form.tsx", "utf8");
 const saveTrendThresholdActionSource = readFileSync("features/settings/actions/save-trend-threshold.ts", "utf8");
 const saveReminderRuleActionSource = readFileSync("features/settings/actions/save-reminder-rule.ts", "utf8");
 const saveSmtpConfigActionSource = readFileSync("features/settings/actions/save-smtp-config.ts", "utf8");
@@ -267,6 +272,19 @@ test("cloud deploy can recreate the Baota Node project", () => {
   assert.match(ensureBtNodeProjectSource, /nginx -t/);
 });
 
+test("production start runs protected reminder checks on a timer", () => {
+  assert.match(startBtSource, /INTERNAL_REMINDER_TOKEN/);
+  assert.match(startBtSource, /REMINDER_CHECK_INTERVAL_MS/);
+  assert.match(startBtSource, /setInterval/);
+  assert.match(startBtSource, /\/api\/reminders\/run/);
+  assert.match(reminderRunRouteSource, /x-internal-reminder-token/);
+  assert.match(reminderRunRouteSource, /runReminderChecksForActiveUsers/);
+  assert.match(reminderSchedulerSource, /createUserRepository/);
+  assert.match(reminderSchedulerSource, /createRecordsRepository\(appDb, user\.id\)/);
+  assert.match(reminderSchedulerSource, /createSettingsRepository\(appDb, user\.id\)/);
+  assert.match(reminderSchedulerSource, /DEFAULT_ADMIN_USER_ID/);
+});
+
 test("桌面端主内容使用可用宽度，不固定在窄容器中", () => {
   assert.match(globalsSource, /max-width: 1680px/);
   assert.match(globalsSource, /max-width: 1180px/);
@@ -375,12 +393,20 @@ test("个人资料保存入口受保护并复用 settings service", () => {
 test("收件邮箱保存入口受保护并保存到当前用户设置", () => {
   assert.match(settingsPageSource, /邮件接收/);
   assert.match(recipientEmailFormStateSource, /initialRecipientEmailFormState/);
+  assert.match(recipientEmailFormStateSource, /initialRecipientEmailTestFormState/);
   assert.match(saveRecipientEmailActionSource, /requireUserAuthContext/);
   assert.match(saveRecipientEmailActionSource, /createSettingsRepositoryForAuth/);
   assert.match(saveRecipientEmailActionSource, /getProfileSettings/);
   assert.match(saveRecipientEmailActionSource, /saveProfileSettings/);
+  assert.match(sendRecipientTestEmailActionSource, /requireUserAuthContext/);
+  assert.match(sendRecipientTestEmailActionSource, /createGlobalSettingsRepository/);
+  assert.match(sendRecipientTestEmailActionSource, /sendTestEmail/);
+  assert.doesNotMatch(sendRecipientTestEmailActionSource, /auth\.role !== "admin"/);
+  assert.match(recipientEmailFormSource, /sendRecipientTestEmailAction/);
+  assert.match(recipientEmailFormSource, /formAction=\{testAction\}/);
   assert.doesNotMatch(saveRecipientEmailActionSource, /export const/);
   assert.doesNotMatch(saveRecipientEmailActionSource, /\.insert\(|\.update\(|\.delete\(/);
+  assert.doesNotMatch(sendRecipientTestEmailActionSource, /\.insert\(|\.update\(|\.delete\(/);
 });
 
 test("趋势阈值保存入口受保护并复用 settings service", () => {
@@ -549,6 +575,7 @@ test("主要路由可以通过 Next 实际渲染", { timeout: 90_000 }, async ()
         assert.match(html, /邮件接收/);
         assert.match(html, /提醒收件邮箱/);
         assert.match(html, /SMTP 发信服务器由管理员统一维护/);
+        assert.match(html, /发送测试邮件/);
         assert.match(html, /提醒规则/);
         assert.match(html, /每日提醒时间/);
         assert.match(html, /站内提醒/);
