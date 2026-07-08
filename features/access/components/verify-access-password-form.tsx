@@ -24,6 +24,9 @@ export function VerifyAccessPasswordForm({ fieldErrors = {} }: VerifyAccessPassw
             name="username"
             type="text"
             autoComplete="username"
+            required
+            placeholder="请输入用户名"
+            aria-invalid={fieldErrors.username ? "true" : undefined}
             aria-describedby={fieldErrors.username ? "username-error" : undefined}
             className="min-h-11 rounded-md border border-[var(--border-soft)] bg-white px-3 text-sm text-[var(--ink-primary)]"
           />
@@ -43,6 +46,9 @@ export function VerifyAccessPasswordForm({ fieldErrors = {} }: VerifyAccessPassw
             name="password"
             type="password"
             autoComplete="current-password"
+            required
+            placeholder="请输入密码"
+            aria-invalid={fieldErrors.password ? "true" : undefined}
             aria-describedby={fieldErrors.password ? "password-error" : undefined}
             className="min-h-11 rounded-md border border-[var(--border-soft)] bg-white px-3 text-sm text-[var(--ink-primary)]"
           />
