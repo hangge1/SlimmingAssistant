@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-export function HomeMotionBackground() {
+export function AppMotionBackground() {
   const layerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

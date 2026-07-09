@@ -19,6 +19,7 @@ const outputDir = join(outputRoot, runId);
 const pages = [
   { path: "/", name: "首页" },
   { path: "/records", name: "记录" },
+  { path: "/data", name: "数据" },
   { path: "/history", name: "历史" },
   { path: "/goals", name: "目标" },
   { path: "/settings", name: "设置" },

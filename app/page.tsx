@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { Activity, CalendarCheck, Flag, Route, Scale } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { GuestModeNotice } from "@/components/layout/guest-mode-notice";
-import { HomeMotionBackground } from "@/components/layout/home-motion-background";
 import { LoginWelcomeToast } from "@/components/layout/login-welcome-toast";
 import { OnboardingGuide } from "@/components/onboarding/onboarding-guide";
 import { createDashboardSummary, type DashboardFocusMetric } from "@/features/dashboard/services/dashboard-summary";
@@ -232,7 +231,6 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <AppShell authMode={auth.mode}>
       <main className="home-main">
-        <HomeMotionBackground />
         {welcomeName ? <LoginWelcomeToast name={welcomeName} /> : null}
         <OnboardingGuide />
         <div className="home-content">

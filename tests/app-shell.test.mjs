@@ -16,13 +16,14 @@ import * as schema from "../db/schema.ts";
 const navigationSource = readFileSync("lib/navigation.ts", "utf8");
 const layoutSource = readFileSync("app/layout.tsx", "utf8");
 const pageSource = readFileSync("app/page.tsx", "utf8");
+const appShellSource = readFileSync("components/layout/app-shell.tsx", "utf8");
 const topNavSource = readFileSync("components/layout/top-nav.tsx", "utf8");
 const logoutRouteSource = readFileSync("app/access/logout/route.ts", "utf8");
 const verifySubmitRouteSource = readFileSync("app/access/verify/submit/route.ts", "utf8");
 const verifyAccessPageSource = readFileSync("app/access/verify/page.tsx", "utf8");
 const createAccessPageSource = readFileSync("app/access/create/page.tsx", "utf8");
 const loginWelcomeToastSource = readFileSync("components/layout/login-welcome-toast.tsx", "utf8");
-const homeMotionBackgroundSource = readFileSync("components/layout/home-motion-background.tsx", "utf8");
+const appMotionBackgroundSource = readFileSync("components/layout/app-motion-background.tsx", "utf8");
 const authMotionBackgroundSource = readFileSync("components/layout/auth-motion-background.tsx", "utf8");
 const verifyAccessPasswordFormSource = readFileSync("features/access/components/verify-access-password-form.tsx", "utf8");
 const pageTurnControlsSource = readFileSync("components/layout/page-turn-controls.tsx", "utf8");
@@ -154,7 +155,7 @@ test("根布局允许浏览器扩展注入 html 属性，避免误报水合错�
 
 test("首页是应用仪表盘，不是营销页面", () => {
   assert.match(pageSource, /跑步瘦身首页入口/);
-  assert.match(pageSource, /HomeMotionBackground/);
+  assert.doesNotMatch(pageSource, /AppMotionBackground|HomeMotionBackground/);
   assert.match(pageSource, /getGoalCardState/);
   assert.match(pageSource, /home-card--goal-/);
   assert.match(pageSource, /健康目标/);
@@ -173,11 +174,13 @@ test("首页是应用仪表盘，不是营销页面", () => {
   assert.doesNotMatch(pageSource, /landing|hero|pricing|signup/i);
 });
 
-test("首页鼠标跟随背景使用轻量运动流线", () => {
-  assert.match(homeMotionBackgroundSource, /requestAnimationFrame/);
-  assert.match(homeMotionBackgroundSource, /--home-pointer-x/);
-  assert.match(homeMotionBackgroundSource, /--home-pointer-y/);
-  assert.match(homeMotionBackgroundSource, /prefers-reduced-motion/);
+test("应用导航页共享鼠标跟随运动背景", () => {
+  assert.match(appShellSource, /AppMotionBackground/);
+  assert.match(appShellSource, /<AppMotionBackground \/>/);
+  assert.match(appMotionBackgroundSource, /requestAnimationFrame/);
+  assert.match(appMotionBackgroundSource, /--home-pointer-x/);
+  assert.match(appMotionBackgroundSource, /--home-pointer-y/);
+  assert.match(appMotionBackgroundSource, /prefers-reduced-motion/);
   assert.match(globalsSource, /\.home-motion-field/);
   assert.match(globalsSource, /\.home-motion-field\s*{[^}]*position:\s*fixed/s);
   assert.match(globalsSource, /home-track-drift/);
@@ -185,7 +188,7 @@ test("首页鼠标跟随背景使用轻量运动流线", () => {
   assert.match(globalsSource, /\.home-card--goal-unset/);
   assert.match(globalsSource, /\.home-card--health-goal/);
   assert.match(globalsSource, /\.home-card--motion-goal/);
-  assert.doesNotMatch(homeMotionBackgroundSource, /setState|useState/);
+  assert.doesNotMatch(appMotionBackgroundSource, /setState|useState/);
 });
 
 test("首页曲线图使用 SVG 展示健康和运动趋势", () => {
@@ -341,6 +344,7 @@ test("UI 截图脚本使用隔离数据库和 Playwright 生成桌面与移动�
   assert.match(uiScreenshotSource, /from "playwright"/);
   assert.match(uiScreenshotSource, /mkdtempSync/);
   assert.match(uiScreenshotSource, /SQLITE_PATH: seededDb\.sqlitePath/);
+  assert.match(uiScreenshotSource, /path: "\/data", name: "数据"/);
   assert.match(uiScreenshotSource, /desktop/);
   assert.match(uiScreenshotSource, /mobile/);
   assert.match(uiScreenshotSource, /page\.screenshot/);
