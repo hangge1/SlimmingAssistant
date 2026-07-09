@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { updateHealthRecordAction } from "../actions/update-health-record";
 import type { HealthRecordEditFormState } from "../actions/health-record-edit-state";
+import { healthRecordInputRules } from "../constants/record-input-rules";
 
 type HealthRecordEditFormProps = {
   id: string;
@@ -11,10 +12,10 @@ type HealthRecordEditFormProps = {
 };
 
 const fields = [
-  { name: "weightKg", label: "体重", unit: "公斤" },
-  { name: "waistCm", label: "腰围", unit: "厘米" },
-  { name: "hipCm", label: "臀围", unit: "厘米" },
-  { name: "bodyFatPercentage", label: "体脂率", unit: "%" },
+  { name: "weightKg", ...healthRecordInputRules.weightKg },
+  { name: "waistCm", ...healthRecordInputRules.waistCm },
+  { name: "hipCm", ...healthRecordInputRules.hipCm },
+  { name: "bodyFatPercentage", ...healthRecordInputRules.bodyFatPercentage },
 ] as const;
 
 export function HealthRecordEditForm({ id, initialState }: HealthRecordEditFormProps) {
@@ -55,6 +56,9 @@ export function HealthRecordEditForm({ id, initialState }: HealthRecordEditFormP
       <div className="grid gap-3 sm:grid-cols-2">
         {fields.map((field) => {
           const error = fieldErrors[field.name];
+          const errorId = `${field.name}-error`;
+          const helperId = `${field.name}-helper`;
+          const describedBy = error ? `${helperId} ${errorId}` : helperId;
           return (
             <div className="grid gap-2" key={field.name}>
               <label htmlFor={field.name} className="text-sm font-semibold text-[var(--ink-primary)]">
@@ -66,13 +70,22 @@ export function HealthRecordEditForm({ id, initialState }: HealthRecordEditFormP
                   defaultValue={values[field.name]}
                   id={field.name}
                   inputMode="decimal"
+                  type="number"
+                  min={field.min}
+                  max={field.max}
+                  step={field.step}
+                  placeholder={field.placeholder}
+                  aria-describedby={describedBy}
                   name={field.name}
                 />
                 <span className="flex min-w-12 items-center justify-center border-l border-[var(--border-soft)] bg-[var(--surface-subtle)] px-3 text-sm text-[var(--ink-secondary)]">
                   {field.unit}
                 </span>
               </div>
-              {error ? <p className="text-sm text-[var(--danger)]">{error}</p> : null}
+              <p id={helperId} className="text-xs font-medium text-[var(--ink-muted)]">
+                {field.helper}
+              </p>
+              {error ? <p id={errorId} className="text-sm text-[var(--danger)]">{error}</p> : null}
             </div>
           );
         })}

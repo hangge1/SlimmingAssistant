@@ -47,9 +47,24 @@ test("健康记录表单非法数值会返回字段错误并保留输入", () =>
   });
 
   assert.equal(result.ok, false);
-  assert.equal(result.ok ? "" : result.fieldErrors.weightKg, "体重必须是大于 0 的数字");
-  assert.equal(result.ok ? "" : result.fieldErrors.waistCm, "腰围必须是大于 0 的数字");
-  assert.equal(result.ok ? "" : result.fieldErrors.hipCm, "臀围必须是大于 0 的数字");
-  assert.equal(result.ok ? "" : result.fieldErrors.bodyFatPercentage, "体脂率必须是 0 到 100 之间的数字");
+  assert.equal(result.ok ? "" : result.fieldErrors.weightKg, "体重请输入 30-250 公斤范围内的数字");
+  assert.equal(result.ok ? "" : result.fieldErrors.waistCm, "腰围请输入 40-200 厘米范围内的数字");
+  assert.equal(result.ok ? "" : result.fieldErrors.hipCm, "臀围请输入 50-220 厘米范围内的数字");
+  assert.equal(result.ok ? "" : result.fieldErrors.bodyFatPercentage, "体脂率请输入 3-70%范围内的数字");
   assert.equal(result.ok ? "" : result.values.waistCm, "abc");
+});
+
+test("健康记录表单会拒绝超出常规人体范围的数据", () => {
+  const result = parseHealthRecordFormValues({
+    weightKg: "251",
+    waistCm: "39.9",
+    hipCm: "221",
+    bodyFatPercentage: "2.9",
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.ok ? "" : result.fieldErrors.weightKg, "体重请输入 30-250 公斤范围内的数字");
+  assert.equal(result.ok ? "" : result.fieldErrors.waistCm, "腰围请输入 40-200 厘米范围内的数字");
+  assert.equal(result.ok ? "" : result.fieldErrors.hipCm, "臀围请输入 50-220 厘米范围内的数字");
+  assert.equal(result.ok ? "" : result.fieldErrors.bodyFatPercentage, "体脂率请输入 3-70%范围内的数字");
 });

@@ -1,4 +1,5 @@
 import { validateLocalDate } from "./records-service.ts";
+import { healthRecordInputRules } from "../constants/record-input-rules.ts";
 
 export type HealthRecordFormValues = {
   weightKg: string;
@@ -34,10 +35,10 @@ export type ParsedHealthRecordInput =
     };
 
 const FIELD_RULES = {
-  weightKg: { label: "体重", minExclusive: 0, maxInclusive: null },
-  waistCm: { label: "腰围", minExclusive: 0, maxInclusive: null },
-  hipCm: { label: "臀围", minExclusive: 0, maxInclusive: null },
-  bodyFatPercentage: { label: "体脂率", minExclusive: null, maxInclusive: 100 },
+  weightKg: healthRecordInputRules.weightKg,
+  waistCm: healthRecordInputRules.waistCm,
+  hipCm: healthRecordInputRules.hipCm,
+  bodyFatPercentage: healthRecordInputRules.bodyFatPercentage,
 } as const;
 
 function parsePositiveNumber(value: string) {
@@ -52,6 +53,11 @@ function parsePositiveNumber(value: string) {
   }
 
   return { empty: false as const, valid: true as const, value: parsed };
+}
+
+function createRangeError(rule: (typeof FIELD_RULES)[keyof typeof FIELD_RULES]) {
+  const unitText = rule.unit === "%" ? "%" : ` ${rule.unit}`;
+  return `${rule.label}请输入 ${rule.min}-${rule.max}${unitText}范围内的数字`;
 }
 
 export function parseHealthRecordFormValues(values: HealthRecordFormValues): ParsedHealthRecordInput {
@@ -70,20 +76,12 @@ export function parseHealthRecordFormValues(values: HealthRecordFormValues): Par
     filledCount += 1;
 
     if (!parsed.valid) {
-      fieldErrors[key] =
-        key === "bodyFatPercentage"
-          ? "体脂率必须是 0 到 100 之间的数字"
-          : `${rule.label}必须是大于 0 的数字`;
+      fieldErrors[key] = createRangeError(rule);
       continue;
     }
 
-    if (rule.minExclusive !== null && parsed.value <= rule.minExclusive) {
-      fieldErrors[key] = `${rule.label}必须是大于 0 的数字`;
-      continue;
-    }
-
-    if (rule.maxInclusive !== null && (parsed.value < 0 || parsed.value > rule.maxInclusive)) {
-      fieldErrors[key] = "体脂率必须是 0 到 100 之间的数字";
+    if (parsed.value < rule.min || parsed.value > rule.max) {
+      fieldErrors[key] = createRangeError(rule);
       continue;
     }
 

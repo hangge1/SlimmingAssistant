@@ -7,6 +7,7 @@ import {
   initialRunRecordFormState,
   type RunRecordFormState,
 } from "../actions/run-record-form-state";
+import { calculatedPaceRule, runRecordInputRules } from "../constants/record-input-rules";
 
 type RunRecordFormProps = {
   initialState: RunRecordFormState;
@@ -14,11 +15,11 @@ type RunRecordFormProps = {
 };
 
 const fields = [
-  { name: "distanceKm", label: "公里数", unit: "公里" },
-  { name: "durationMinutes", label: "运动时长", unit: "分钟" },
-  { name: "averageHeartRateBpm", label: "平均心率", unit: "次/分" },
-  { name: "averageStrideMeters", label: "平均步幅", unit: "米" },
-  { name: "cadenceSpm", label: "步频", unit: "步/分" },
+  { name: "distanceKm", ...runRecordInputRules.distanceKm },
+  { name: "durationMinutes", ...runRecordInputRules.durationMinutes },
+  { name: "averageHeartRateBpm", ...runRecordInputRules.averageHeartRateBpm },
+  { name: "averageStrideMeters", ...runRecordInputRules.averageStrideMeters },
+  { name: "cadenceSpm", ...runRecordInputRules.cadenceSpm },
 ] as const;
 
 function calculatePaceText(distanceValue: string, durationValue: string) {
@@ -70,7 +71,9 @@ export function RunRecordForm({ initialState, localDate }: RunRecordFormProps) {
       <div className="grid max-w-[320px] gap-3">
         {fields.map((field) => {
           const errorId = `${field.name}-error`;
+          const helperId = `${field.name}-helper`;
           const error = fieldErrors[field.name];
+          const describedBy = error ? `${helperId} ${errorId}` : helperId;
 
           return (
             <div className="grid gap-2" key={field.name}>
@@ -81,8 +84,13 @@ export function RunRecordForm({ initialState, localDate }: RunRecordFormProps) {
                 <input
                   id={field.name}
                   name={field.name}
-                  inputMode="decimal"
-                  aria-describedby={error ? errorId : undefined}
+                  type="number"
+                  inputMode={"integer" in field && field.integer ? "numeric" : "decimal"}
+                  min={field.min}
+                  max={field.max}
+                  step={field.step}
+                  placeholder={field.placeholder}
+                  aria-describedby={describedBy}
                   className="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-[var(--ink-primary)] outline-none"
                   defaultValue={values[field.name]}
                 />
@@ -90,6 +98,9 @@ export function RunRecordForm({ initialState, localDate }: RunRecordFormProps) {
                   {field.unit}
                 </span>
               </div>
+              <p id={helperId} className="text-xs font-medium text-[var(--ink-muted)]">
+                {field.helper}
+              </p>
               {error ? (
                 <p id={errorId} className="text-sm text-[var(--danger)]">
                   {error}
@@ -106,6 +117,7 @@ export function RunRecordForm({ initialState, localDate }: RunRecordFormProps) {
           <span>{calculatedPace}</span>
           <span>只读</span>
         </div>
+        <p className="text-xs font-medium text-[var(--ink-muted)]">{calculatedPaceRule.helper}</p>
       </div>
 
       <div>

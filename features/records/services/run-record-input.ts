@@ -1,4 +1,5 @@
 import { validateLocalDate } from "./records-service.ts";
+import { calculatedPaceRule, runRecordInputRules } from "../constants/record-input-rules.ts";
 
 export type RunRecordFormValues = {
   distanceKm: string;
@@ -38,12 +39,20 @@ export type ParsedRunRecordInput =
     };
 
 const FIELD_LABELS = {
-  distanceKm: "公里数",
-  durationMinutes: "运动时长",
+  distanceKm: runRecordInputRules.distanceKm.label,
+  durationMinutes: runRecordInputRules.durationMinutes.label,
   paceMinutesPerKm: "配速",
-  averageHeartRateBpm: "平均心率",
-  averageStrideMeters: "平均步幅",
-  cadenceSpm: "步频",
+  averageHeartRateBpm: runRecordInputRules.averageHeartRateBpm.label,
+  averageStrideMeters: runRecordInputRules.averageStrideMeters.label,
+  cadenceSpm: runRecordInputRules.cadenceSpm.label,
+} as const;
+
+const FIELD_RULES = {
+  distanceKm: runRecordInputRules.distanceKm,
+  durationMinutes: runRecordInputRules.durationMinutes,
+  averageHeartRateBpm: runRecordInputRules.averageHeartRateBpm,
+  averageStrideMeters: runRecordInputRules.averageStrideMeters,
+  cadenceSpm: runRecordInputRules.cadenceSpm,
 } as const;
 
 function parseOptionalPositiveNumber(value: string) {
@@ -60,8 +69,19 @@ function parseOptionalPositiveNumber(value: string) {
   return { empty: false as const, valid: true as const, value: parsed };
 }
 
-function setPositiveFieldError(errors: RunRecordFieldErrors, key: keyof RunRecordFormValues) {
-  errors[key] = `${FIELD_LABELS[key]}必须是大于 0 的数字`;
+function createRangeError(key: keyof typeof FIELD_RULES) {
+  const rule = FIELD_RULES[key];
+  const valueType = "integer" in rule && rule.integer ? "整数" : "数字";
+  return `${FIELD_LABELS[key]}请输入 ${rule.min}-${rule.max} ${rule.unit}范围内的${valueType}`;
+}
+
+function setRangeFieldError(errors: RunRecordFieldErrors, key: keyof typeof FIELD_RULES) {
+  errors[key] = createRangeError(key);
+}
+
+function isOutOfRange(key: keyof typeof FIELD_RULES, value: number) {
+  const rule = FIELD_RULES[key];
+  return value < rule.min || value > rule.max;
 }
 
 export function parseRunRecordFormValues(values: RunRecordFormValues): ParsedRunRecordInput {
@@ -69,27 +89,58 @@ export function parseRunRecordFormValues(values: RunRecordFormValues): ParsedRun
 
   const distance = parseOptionalPositiveNumber(values.distanceKm);
   if (distance.empty || !distance.valid) {
-    setPositiveFieldError(fieldErrors, "distanceKm");
+    fieldErrors.distanceKm = distance.empty ? "请填写公里数" : createRangeError("distanceKm");
+  } else if (isOutOfRange("distanceKm", distance.value)) {
+    setRangeFieldError(fieldErrors, "distanceKm");
   }
 
   const duration = parseOptionalPositiveNumber(values.durationMinutes);
   if (!duration.empty && !duration.valid) {
-    setPositiveFieldError(fieldErrors, "durationMinutes");
+    setRangeFieldError(fieldErrors, "durationMinutes");
+  } else if (
+    !duration.empty &&
+    duration.valid &&
+    (!Number.isInteger(duration.value) || isOutOfRange("durationMinutes", duration.value))
+  ) {
+    setRangeFieldError(fieldErrors, "durationMinutes");
   }
 
   const heartRate = parseOptionalPositiveNumber(values.averageHeartRateBpm);
   if (!heartRate.empty && (!heartRate.valid || !Number.isInteger(heartRate.value))) {
-    setPositiveFieldError(fieldErrors, "averageHeartRateBpm");
+    setRangeFieldError(fieldErrors, "averageHeartRateBpm");
+  } else if (!heartRate.empty && heartRate.valid && isOutOfRange("averageHeartRateBpm", heartRate.value)) {
+    setRangeFieldError(fieldErrors, "averageHeartRateBpm");
   }
 
   const stride = parseOptionalPositiveNumber(values.averageStrideMeters);
   if (!stride.empty && !stride.valid) {
-    setPositiveFieldError(fieldErrors, "averageStrideMeters");
+    setRangeFieldError(fieldErrors, "averageStrideMeters");
+  } else if (!stride.empty && stride.valid && isOutOfRange("averageStrideMeters", stride.value)) {
+    setRangeFieldError(fieldErrors, "averageStrideMeters");
   }
 
   const cadence = parseOptionalPositiveNumber(values.cadenceSpm);
   if (!cadence.empty && (!cadence.valid || !Number.isInteger(cadence.value))) {
-    setPositiveFieldError(fieldErrors, "cadenceSpm");
+    setRangeFieldError(fieldErrors, "cadenceSpm");
+  } else if (!cadence.empty && cadence.valid && isOutOfRange("cadenceSpm", cadence.value)) {
+    setRangeFieldError(fieldErrors, "cadenceSpm");
+  }
+
+  if (
+    !distance.empty &&
+    distance.valid &&
+    !duration.empty &&
+    duration.valid &&
+    !fieldErrors.distanceKm &&
+    !fieldErrors.durationMinutes
+  ) {
+    const paceMinutesPerKm = duration.value / distance.value;
+    if (
+      paceMinutesPerKm < calculatedPaceRule.minMinutesPerKm ||
+      paceMinutesPerKm > calculatedPaceRule.maxMinutesPerKm
+    ) {
+      fieldErrors.durationMinutes = "配速看起来不合理，请检查公里数和运动时长";
+    }
   }
 
   if (Object.keys(fieldErrors).length > 0) {

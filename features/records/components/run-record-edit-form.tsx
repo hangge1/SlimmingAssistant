@@ -4,6 +4,7 @@ import { useActionState, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { updateRunRecordAction } from "../actions/update-run-record";
 import type { RunRecordEditFormState } from "../actions/run-record-edit-state";
+import { calculatedPaceRule, runRecordInputRules } from "../constants/record-input-rules";
 
 type RunRecordEditFormProps = {
   id: string;
@@ -11,11 +12,11 @@ type RunRecordEditFormProps = {
 };
 
 const fields = [
-  { name: "distanceKm", label: "公里数", unit: "公里" },
-  { name: "durationMinutes", label: "运动时长", unit: "分钟" },
-  { name: "averageHeartRateBpm", label: "平均心率", unit: "次/分" },
-  { name: "averageStrideMeters", label: "平均步幅", unit: "米" },
-  { name: "cadenceSpm", label: "步频", unit: "步/分" },
+  { name: "distanceKm", ...runRecordInputRules.distanceKm },
+  { name: "durationMinutes", ...runRecordInputRules.durationMinutes },
+  { name: "averageHeartRateBpm", ...runRecordInputRules.averageHeartRateBpm },
+  { name: "averageStrideMeters", ...runRecordInputRules.averageStrideMeters },
+  { name: "cadenceSpm", ...runRecordInputRules.cadenceSpm },
 ] as const;
 
 function calculatePaceText(distanceValue: string, durationValue: string) {
@@ -81,6 +82,9 @@ export function RunRecordEditForm({ id, initialState }: RunRecordEditFormProps) 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {fields.map((field) => {
           const error = fieldErrors[field.name];
+          const errorId = `${field.name}-error`;
+          const helperId = `${field.name}-helper`;
+          const describedBy = error ? `${helperId} ${errorId}` : helperId;
 
           return (
             <div className="grid gap-2" key={field.name}>
@@ -91,7 +95,13 @@ export function RunRecordEditForm({ id, initialState }: RunRecordEditFormProps) 
                 <input
                   className="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-[var(--ink-primary)] outline-none"
                   id={field.name}
-                  inputMode="decimal"
+                  inputMode={"integer" in field && field.integer ? "numeric" : "decimal"}
+                  type="number"
+                  min={field.min}
+                  max={field.max}
+                  step={field.step}
+                  placeholder={field.placeholder}
+                  aria-describedby={describedBy}
                   name={field.name}
                   defaultValue={values[field.name]}
                 />
@@ -99,7 +109,10 @@ export function RunRecordEditForm({ id, initialState }: RunRecordEditFormProps) 
                   {field.unit}
                 </span>
               </div>
-              {error ? <p className="text-sm text-[var(--danger)]">{error}</p> : null}
+              <p id={helperId} className="text-xs font-medium text-[var(--ink-muted)]">
+                {field.helper}
+              </p>
+              {error ? <p id={errorId} className="text-sm text-[var(--danger)]">{error}</p> : null}
             </div>
           );
         })}
@@ -111,6 +124,7 @@ export function RunRecordEditForm({ id, initialState }: RunRecordEditFormProps) 
           <span>{calculatedPace}</span>
           <span>只读</span>
         </div>
+        <p className="text-xs font-medium text-[var(--ink-muted)]">{calculatedPaceRule.helper}</p>
       </div>
 
       <div>
