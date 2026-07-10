@@ -24,6 +24,7 @@ const verifyAccessPageSource = readFileSync("app/access/verify/page.tsx", "utf8"
 const createAccessPageSource = readFileSync("app/access/create/page.tsx", "utf8");
 const loginWelcomeToastSource = readFileSync("components/layout/login-welcome-toast.tsx", "utf8");
 const appMotionBackgroundSource = readFileSync("components/layout/app-motion-background.tsx", "utf8");
+const onboardingGuideSource = readFileSync("components/onboarding/onboarding-guide.tsx", "utf8");
 const authMotionBackgroundSource = readFileSync("components/layout/auth-motion-background.tsx", "utf8");
 const verifyAccessPasswordFormSource = readFileSync("features/access/components/verify-access-password-form.tsx", "utf8");
 const pageTurnControlsSource = readFileSync("components/layout/page-turn-controls.tsx", "utf8");
@@ -174,6 +175,15 @@ test("首页是应用仪表盘，不是营销页面", () => {
   assert.doesNotMatch(pageSource, /landing|hero|pricing|signup/i);
 });
 
+test("使用引导不会把下一步点击透传给页面翻页区", () => {
+  assert.match(onboardingGuideSource, /createPortal/);
+  assert.match(onboardingGuideSource, /document\.body/);
+  assert.match(onboardingGuideSource, /event\.preventDefault\(\)/);
+  assert.match(onboardingGuideSource, /event\.stopPropagation\(\)/);
+  assert.match(onboardingGuideSource, /onClick=\{handleNext\}/);
+  assert.match(onboardingGuideSource, /onClick=\{handleLayerClick\}/);
+});
+
 test("应用导航页共享鼠标跟随运动背景", () => {
   assert.match(appShellSource, /AppMotionBackground/);
   assert.match(appShellSource, /<AppMotionBackground \/>/);
@@ -233,6 +243,8 @@ test("导航、按钮和移动端安全区具备基础交互保护", () => {
   assert.match(topNavSource, /top-nav-scroll/);
   assert.match(pageTurnControlsSource, /page-turn-zone/);
   assert.match(buttonSource, /type: type \?\? "button"/);
+  assert.match(globalsSource, /width:\s*clamp\(64px,\s*7vw,\s*112px\)/);
+  assert.match(globalsSource, /\.onboarding-trigger\s*\{[\s\S]*?z-index:\s*30/);
   assert.match(globalsSource, /page-turn-zone:hover/);
   assert.match(globalsSource, /top-nav-scroll/);
 });

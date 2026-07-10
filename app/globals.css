@@ -385,7 +385,7 @@ textarea:hover {
   top: 96px;
   bottom: 0;
   z-index: 20;
-  width: max(320px, calc((100vw - 1180px) / 2));
+  width: clamp(64px, 7vw, 112px);
   display: none;
   align-items: center;
   pointer-events: auto;
@@ -782,6 +782,7 @@ textarea:hover {
   position: absolute;
   top: 14px;
   right: 24px;
+  z-index: 30;
   min-height: 34px;
   border: 1px solid var(--border-soft);
   border-radius: 999px;

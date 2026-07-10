@@ -1,7 +1,8 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
 
 const storageKey = "slimming-assistant-onboarding-seen-v2";
 const gap = 14;
@@ -181,55 +182,80 @@ export function OnboardingGuide() {
     setOpen(true);
   }
 
+  function stopTourEvent(event: MouseEvent<HTMLElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function handleClose(event: MouseEvent<HTMLButtonElement>) {
+    stopTourEvent(event);
+    closeGuide();
+  }
+
+  function handleNext(event: MouseEvent<HTMLButtonElement>) {
+    stopTourEvent(event);
+    nextStep();
+  }
+
+  function handleLayerClick(event: MouseEvent<HTMLDivElement>) {
+    stopTourEvent(event);
+    nextStep();
+  }
+
+  const tourLayer =
+    open && typeof document !== "undefined"
+      ? createPortal(
+          <div className="tour-layer" onClick={handleLayerClick} role="presentation">
+            {targetRect ? (
+              <div
+                aria-hidden="true"
+                className="tour-spotlight"
+                style={{
+                  height: targetRect.height + 18,
+                  left: targetRect.left - 9,
+                  top: targetRect.top - 9,
+                  width: targetRect.width + 18,
+                }}
+              />
+            ) : null}
+
+            <section
+              aria-label="使用引导"
+              aria-live="polite"
+              className={`tour-tip tour-tip--${step.placement}`}
+              onClick={(event) => event.stopPropagation()}
+              style={tipStyle}
+            >
+              <div className="tour-tip-head">
+                <span className="tour-progress">
+                  {stepIndex + 1}/{tourSteps.length}
+                </span>
+                <button aria-label="关闭使用引导" className="tour-close" onClick={handleClose} type="button">
+                  <X aria-hidden="true" className="size-4" />
+                </button>
+              </div>
+              <h2 className="tour-title">{step.title}</h2>
+              <p className="tour-text">{step.text}</p>
+              <div className="tour-actions">
+                <button className="tour-secondary" onClick={handleClose} type="button">
+                  跳过
+                </button>
+                <button className="tour-primary" onClick={handleNext} type="button">
+                  {stepIndex >= tourSteps.length - 1 ? "完成" : "下一步"}
+                </button>
+              </div>
+            </section>
+          </div>,
+          document.body,
+        )
+      : null;
+
   return (
     <>
       <button className="onboarding-trigger" onClick={restartGuide} type="button">
         使用引导
       </button>
-
-      {open ? (
-        <div className="tour-layer" onClick={nextStep} role="presentation">
-          {targetRect ? (
-            <div
-              aria-hidden="true"
-              className="tour-spotlight"
-              style={{
-                height: targetRect.height + 18,
-                left: targetRect.left - 9,
-                top: targetRect.top - 9,
-                width: targetRect.width + 18,
-              }}
-            />
-          ) : null}
-
-          <section
-            aria-label="使用引导"
-            aria-live="polite"
-            className={`tour-tip tour-tip--${step.placement}`}
-            onClick={(event) => event.stopPropagation()}
-            style={tipStyle}
-          >
-            <div className="tour-tip-head">
-              <span className="tour-progress">
-                {stepIndex + 1}/{tourSteps.length}
-              </span>
-              <button aria-label="关闭使用引导" className="tour-close" onClick={closeGuide} type="button">
-                <X aria-hidden="true" className="size-4" />
-              </button>
-            </div>
-            <h2 className="tour-title">{step.title}</h2>
-            <p className="tour-text">{step.text}</p>
-            <div className="tour-actions">
-              <button className="tour-secondary" onClick={closeGuide} type="button">
-                跳过
-              </button>
-              <button className="tour-primary" onClick={nextStep} type="button">
-                {stepIndex >= tourSteps.length - 1 ? "完成" : "下一步"}
-              </button>
-            </div>
-          </section>
-        </div>
-      ) : null}
+      {tourLayer}
     </>
   );
 }
