@@ -1405,13 +1405,15 @@ textarea:hover {
   }
 
   .auth-page {
-    place-items: end center;
-    padding: 18px 12px;
+    min-height: 100svh;
+    place-items: center;
+    padding: max(16px, env(safe-area-inset-top)) 12px max(28px, env(safe-area-inset-bottom));
   }
 
   .auth-card {
     padding: 20px;
     border-radius: 8px;
+    transform: translateY(clamp(-36px, -4vh, -18px));
   }
 
   .auth-brand {

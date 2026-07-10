@@ -279,6 +279,9 @@ test("access pages use a motion background and prominent title treatment", () =>
   assert.match(globalsSource, /\.auth-card__header\s*{[^}]*text-align:\s*center/s);
   assert.match(globalsSource, /\.auth-title\s*{[^}]*font-size:\s*42px/s);
   assert.match(globalsSource, /\.auth-title\s*{[^}]*text-align:\s*center/s);
+  assert.match(globalsSource, /min-height:\s*100svh/);
+  assert.match(globalsSource, /transform:\s*translateY\(clamp\(-36px,\s*-4vh,\s*-18px\)\)/);
+  assert.doesNotMatch(globalsSource, /place-items:\s*end center/);
 });
 
 test("login success shows a one-time welcome toast on the home page", () => {
