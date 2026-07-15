@@ -8,34 +8,39 @@ import SiteLayout from "@/layouts/SiteLayout.astro";
   <SiteHeader />
   <main class="project-detail">
     <section class="detail-hero">
-      <p class="pill">Project · Running & Weight Loss</p>
-      <h1>跑步瘦身助手</h1>
-      <p>
-        一个面向个人使用的健康与跑步管理工具。它把每日记录、目标差距、趋势反馈和提醒机制串成一个低摩擦闭环。
-      </p>
-      <div class="actions">
-        <a class="button button-primary" href="/app/slimming/">进入应用</a>
-        <a class="button button-secondary" href="/">返回个人站</a>
+      <img class="detail-backdrop" src="/projects/slimming-home-preview.png" alt="" aria-hidden="true" />
+      <div class="detail-hero-copy">
+        <p class="eyebrow">Project · Running & Weight Loss</p>
+        <h1>跑步瘦身助手</h1>
+        <p>
+          一个面向个人使用的健康与跑步管理工具。它把每日记录、目标差距、趋势反馈和提醒机制串成一个低摩擦闭环。
+        </p>
+        <div class="actions">
+          <a class="button button-primary" href="/app/slimming/">进入应用</a>
+          <a class="button button-secondary" href="/">返回个人站</a>
+        </div>
       </div>
-      <img class="detail-preview" src="/projects/slimming-home-preview.png" alt="跑步瘦身助手首页预览" />
     </section>
 
     <section class="section section-muted">
       <div class="section-heading">
         <p>Architecture</p>
-        <h2>迁移方向</h2>
-        <span>当前先建立 Astro + Vue 前端与 Go API 骨架，后续再迁移真实业务能力。</span>
+        <h2>当前架构</h2>
+        <span>个人站负责介绍与入口，跑步助手作为独立应用承载登录、记录、数据、历史和设置。</span>
       </div>
       <div class="card-grid">
         <article class="card">
+          <span class="card-index">前端</span>
           <h3>Astro + Vue</h3>
           <p>Astro 负责个人站内容，Vue 负责跑步助手交互界面。</p>
         </article>
         <article class="card">
+          <span class="card-index">后端</span>
           <h3>Go API</h3>
           <p>后端承接登录、记录、目标、提醒和数据库访问。</p>
         </article>
         <article class="card">
+          <span class="card-index">部署</span>
           <h3>宝塔部署</h3>
           <p>Nginx 托管静态文件，/api 反向代理到 Go 服务。</p>
         </article>

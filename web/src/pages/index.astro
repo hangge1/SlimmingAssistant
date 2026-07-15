@@ -9,16 +9,37 @@ import { cognitionItems, projects, techItems } from "@/data/site";
   <SiteHeader />
   <main>
     <section class="hero">
+      <img class="hero-backdrop" src="/projects/slimming-home-preview.png" alt="" aria-hidden="true" />
       <div class="hero-inner">
-        <p class="pill">认知 · 技术 · 项目</p>
+        <p class="eyebrow">个人 Web 站点</p>
         <h1>Hangge</h1>
         <p class="hero-copy">
-          这里会逐步沉淀我的思考、工程实践和个人项目。跑步瘦身助手会保留为项目板块中的一个独立应用。
+          用一个长期可维护的站点，沉淀认知、记录技术实践，并把跑步瘦身助手这类项目独立成可持续迭代的作品。
         </p>
         <div class="actions">
-          <a class="button button-primary" href="#projects">查看项目</a>
-          <a class="button button-secondary" href="/app/slimming/">进入跑步助手</a>
+          <a class="button button-primary" href="#projects">查看项目板块</a>
+          <a class="button button-secondary" href="#cognition">浏览认知记录</a>
         </div>
+      </div>
+    </section>
+
+    <section class="section overview-section" aria-label="站点结构">
+      <div class="overview-grid">
+        <a class="overview-item" href="#cognition">
+          <span>01</span>
+          <strong>认知</strong>
+          <p>长期思考、方法论、复盘记录。</p>
+        </a>
+        <a class="overview-item" href="#tech">
+          <span>02</span>
+          <strong>技术</strong>
+          <p>工程实践、部署经验、AI 辅助流程。</p>
+        </a>
+        <a class="overview-item" href="#projects">
+          <span>03</span>
+          <strong>项目</strong>
+          <p>可运行工具、迭代记录、应用入口。</p>
+        </a>
       </div>
     </section>
 
@@ -31,6 +52,7 @@ import { cognitionItems, projects, techItems } from "@/data/site";
       <div class="card-grid">
         {cognitionItems.map((item) => (
           <article class="card">
+            <span class="card-index">认知记录</span>
             <h3>{item.title}</h3>
             <p>{item.description}</p>
           </article>
@@ -45,7 +67,12 @@ import { cognitionItems, projects, techItems } from "@/data/site";
         <span>记录前端、后端、部署和 AI 辅助开发中的实际经验，优先保留能复用的工程结论。</span>
       </div>
       <div class="tech-grid">
-        {techItems.map((item) => <div class="tech-item">{item}</div>)}
+        {techItems.map((item, index) => (
+          <div class="tech-item">
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <strong>{item}</strong>
+          </div>
+        ))}
       </div>
     </section>
 
@@ -59,12 +86,12 @@ import { cognitionItems, projects, techItems } from "@/data/site";
         {projects.map((project) => (
           <a class="project-card" href={project.href}>
             <img class="project-card-image" src={project.image} alt={`${project.title} 预览`} loading="lazy" />
-            <div>
+            <div class="project-card-copy">
               <span class="pill">{project.status}</span>
               <h3>{project.title}</h3>
               <p>{project.description}</p>
             </div>
-            <span class="button button-primary">查看项目</span>
+            <span class="project-arrow" aria-hidden="true">→</span>
           </a>
         ))}
       </div>

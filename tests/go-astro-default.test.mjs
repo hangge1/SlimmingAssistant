@@ -78,7 +78,7 @@ test("Astro public site owns the homepage and keeps slimming assistant as a proj
   assert.match(siteSource, /\/projects\/slimming/);
   assert.match(siteSource, /\/projects\/slimming-home-preview\.png/);
   assert.match(homePageSource, /project-card-image/);
-  assert.match(projectPageSource, /detail-preview/);
+  assert.match(projectPageSource, /detail-backdrop/);
   assert.match(projectPageSource, /\/app\/slimming/);
   assert.match(slimmingPageSource, /SlimmingAppShell/);
   assert.match(siteSource, /跑步瘦身助手|Slimming Assistant/);

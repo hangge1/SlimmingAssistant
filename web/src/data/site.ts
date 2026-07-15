@@ -1,30 +1,30 @@
 export const cognitionItems = [
   {
-    title: "把长期问题拆成可执行循环",
-    description: "关注目标、反馈、复盘和下一次行动，让想法稳定落到日常实践。",
+    title: "长期问题的拆解",
+    description: "把模糊目标拆成输入、行动、反馈和复盘，让判断过程能够持续迭代。",
   },
   {
-    title: "用工具降低坚持成本",
-    description: "优先建设能减少重复劳动、提升反馈密度的小系统，而不是追求一次性完美方案。",
+    title: "个人系统的方法论",
+    description: "关注如何用工具降低重复成本，用结构化记录提升下一次决策质量。",
   },
   {
-    title: "记录真实过程",
-    description: "保留判断依据、技术取舍和踩坑过程，让后续决策可以被复盘。",
+    title: "真实过程的复盘",
+    description: "记录判断依据、取舍和踩坑过程，让经验不只停留在结论层面。",
   },
 ];
 
 export const techItems = [
-  "Go 后端服务",
-  "Astro / Vue 前端",
-  "宝塔与 Nginx 部署",
-  "SQLite 到 PostgreSQL 演进",
+  "Go 后端服务与接口设计",
+  "Astro / Vue 内容与交互分层",
+  "宝塔、Nginx 与 Linux 部署",
+  "SQLite 到 PostgreSQL 的数据演进",
   "AI 辅助工程工作流",
 ];
 
 export const projects = [
   {
     title: "跑步瘦身助手",
-    description: "围绕跑步、健康记录、目标差距和提醒机制构建的个人减脂闭环工具。",
+    description: "围绕跑步、健康记录、目标差距和提醒机制构建的个人减脂闭环工具，已独立为项目板块中的应用入口。",
     href: "/projects/slimming/",
     appHref: "/app/slimming/",
     image: "/projects/slimming-home-preview.png",
