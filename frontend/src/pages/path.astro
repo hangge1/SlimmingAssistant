@@ -1,0 +1,110 @@
+﻿---
+import SiteFooter from "@/components/SiteFooter.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import SiteLayout from "@/layouts/SiteLayout.astro";
+import { resetSystems } from "@/data/site";
+---
+
+<SiteLayout title="复位路径 | 复位" description="状态识别之后，我们把你的状态整理成今天可以走的一条修复路径。">
+  <SiteHeader />
+  <main class="tool-page">
+    <section class="tool-hero">
+      <p class="eyebrow">复位路径</p>
+      <h1>复位路径</h1>
+      <p>状态对话之后，我们先不急着做很多事。我们只整理：你现在在哪里，今天先从哪条修复方向开始。</p>
+    </section>
+
+    <section class="path-layout">
+      <article class="tool-panel path-summary" id="path-summary" aria-live="polite">
+        <div class="panel-heading">
+          <h2>我先帮你把刚才的状态对话整理一下</h2>
+          <p>如果这里还没有内容，你可以先做一次复位状态识别。</p>
+        </div>
+        <div class="result-box">
+          还没有可用的复位路径。我们先从状态对话开始。
+        </div>
+        <div class="actions">
+          <a class="button button-primary" href="/state/">开始复位状态识别</a>
+        </div>
+      </article>
+
+      <aside class="tool-panel">
+        <div class="panel-heading">
+          <h2>今天只需要一个优先方向</h2>
+          <p>你不用同时处理心理、认知和行为。先按路径走一条路，做完再回来复盘。</p>
+        </div>
+        <div class="acceptance-list">
+          <span>如果你很难受，先走心理重建。</span>
+          <span>如果你很混乱，先走认知重塑。</span>
+          <span>如果你动不起来，先走行为重构。</span>
+        </div>
+      </aside>
+    </section>
+
+    <section id="directions" class="section path-directions">
+      <div class="section-heading">
+        <p>修复方向</p>
+        <h2>三大修复方向</h2>
+        <span>这三条路不是内容分类，而是你状态识别之后可能进入的修复路径。</span>
+      </div>
+      <div class="card-grid">
+        {resetSystems.map((system) => (
+          <a class="card system-card" href={system.href}>
+            <span class="card-index">{system.index}</span>
+            <h3>{system.title}</h3>
+            <strong>{system.role}</strong>
+            <p>{system.description}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  </main>
+  <SiteFooter />
+</SiteLayout>
+
+<script is:inline>
+  const pathKey = "resetlife:latest-path";
+  const summary = document.querySelector("#path-summary");
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    })[char]);
+  }
+
+  function readPlan() {
+    try {
+      return JSON.parse(localStorage.getItem(pathKey) || "null");
+    } catch {
+      return null;
+    }
+  }
+
+  const plan = readPlan();
+  if (plan) {
+    summary.innerHTML = `
+      <div class="panel-heading">
+        <h2>这是你这次的复位路径</h2>
+        <p>先按这条路走，不需要同时解决全部问题。</p>
+      </div>
+      <div class="result-box">
+        <strong>${escapeHtml(plan.direction?.title || "心理重建")}</strong>
+        <p>${escapeHtml(plan.direction?.reason || "我们先从一个能开始的小动作走起。")}</p>
+        <p>你刚才选到的状态：${escapeHtml((plan.states || []).join(" / "))}</p>
+        <p>最受影响的区域：${escapeHtml(plan.lifeArea || "暂未选择")}</p>
+        <p>当前阶段：${escapeHtml(plan.stage || "看见自己")}</p>
+        ${plan.note ? `<p>你补充说：${escapeHtml(plan.note)}</p>` : ""}
+      </div>
+      <div class="actions">
+        <a class="button button-primary" href="${escapeHtml(plan.direction?.href || "/psychology/")}">进入${escapeHtml(plan.direction?.title || "心理重建")}</a>
+        <a class="button button-secondary" href="/review/">做完后回来复盘</a>
+      </div>
+    `;
+  }
+</script>
+
+

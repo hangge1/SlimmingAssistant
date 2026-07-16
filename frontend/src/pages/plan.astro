@@ -1,108 +1,14 @@
 ---
-import SiteFooter from "@/components/SiteFooter.astro";
-import SiteHeader from "@/components/SiteHeader.astro";
 import SiteLayout from "@/layouts/SiteLayout.astro";
-import { resetSystems } from "@/data/site";
 ---
 
-<SiteLayout title="复位方案 | 复位" description="诊断之后，我们把你的状态整理成今天可以走的一条修复路径。">
-  <SiteHeader />
-  <main class="tool-page">
-    <section class="tool-hero">
-      <p class="eyebrow">Reset Plan</p>
-      <h1>复位方案</h1>
-      <p>问诊之后，我们先不急着做很多事。我们只整理：你现在在哪里，今天先从哪条修复方向开始。</p>
-    </section>
-
-    <section class="plan-layout">
-      <article class="tool-panel plan-summary" id="plan-summary" aria-live="polite">
-        <div class="panel-heading">
-          <h2>我先帮你把刚才的问诊整理一下</h2>
-          <p>如果这里还没有内容，你可以先做一次复位诊断。</p>
-        </div>
-        <div class="result-box">
-          还没有可用的复位方案。我们先从问诊开始。
-        </div>
-        <div class="actions">
-          <a class="button button-primary" href="/diagnosis/">开始复位诊断</a>
-        </div>
-      </article>
-
-      <aside class="tool-panel">
-        <div class="panel-heading">
-          <h2>今天只需要一个优先方向</h2>
-          <p>你不用同时处理心理、认知和行为。先按方案走一条路，做完再回来复盘。</p>
-        </div>
-        <div class="acceptance-list">
-          <span>如果你很难受，先走心理重建。</span>
-          <span>如果你很混乱，先走认知重塑。</span>
-          <span>如果你动不起来，先走行为重构。</span>
-        </div>
-      </aside>
-    </section>
-
-    <section id="directions" class="section plan-directions">
-      <div class="section-heading">
-        <p>Directions</p>
-        <h2>三大修复方向</h2>
-        <span>这三条路不是内容分类，而是你诊断之后可能进入的修复路径。</span>
-      </div>
-      <div class="card-grid">
-        {resetSystems.map((system) => (
-          <a class="card system-card" href={system.href}>
-            <span class="card-index">{system.index}</span>
-            <h3>{system.title}</h3>
-            <strong>{system.role}</strong>
-            <p>{system.description}</p>
-          </a>
-        ))}
-      </div>
-    </section>
+<SiteLayout title="正在前往复位路径 | 复位" description="这个入口已更名为复位路径。">
+  <main class="redirect-page">
+    <p>这个入口已经改成“复位路径”。我们现在带你过去。</p>
+    <a class="button button-primary" href="/path/">进入复位路径</a>
   </main>
-  <SiteFooter />
 </SiteLayout>
 
 <script is:inline>
-  const planKey = "resetlife:latest-plan";
-  const summary = document.querySelector("#plan-summary");
-
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, (char) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;",
-    })[char]);
-  }
-
-  function readPlan() {
-    try {
-      return JSON.parse(localStorage.getItem(planKey) || "null");
-    } catch {
-      return null;
-    }
-  }
-
-  const plan = readPlan();
-  if (plan) {
-    summary.innerHTML = `
-      <div class="panel-heading">
-        <h2>这是你这次的复位方案</h2>
-        <p>先按这条路走，不需要同时解决全部问题。</p>
-      </div>
-      <div class="result-box">
-        <strong>${escapeHtml(plan.direction?.title || "心理重建")}</strong>
-        <p>${escapeHtml(plan.direction?.reason || "我们先从一个能开始的小动作走起。")}</p>
-        <p>你刚才选到的状态：${escapeHtml((plan.states || []).join(" / "))}</p>
-        <p>最受影响的区域：${escapeHtml(plan.lifeArea || "暂未选择")}</p>
-        <p>当前阶段：${escapeHtml(plan.stage || "看见自己")}</p>
-        ${plan.note ? `<p>你补充说：${escapeHtml(plan.note)}</p>` : ""}
-      </div>
-      <div class="actions">
-        <a class="button button-primary" href="${escapeHtml(plan.direction?.href || "/psychology/")}">进入${escapeHtml(plan.direction?.title || "心理重建")}</a>
-        <a class="button button-secondary" href="/review/">做完后回来复盘</a>
-      </div>
-    `;
-  }
+  window.location.replace("/path/");
 </script>

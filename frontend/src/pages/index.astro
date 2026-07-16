@@ -18,29 +18,29 @@ import { disorderStates, resetFlow, resetSystems } from "@/data/site";
             如果你现在觉得自己乱了、卡住了、动不起来，我们先不谈大道理。我们一步步看见你自己，整理你面对的问题，再做一个小到能开始的动作。
           </p>
           <div class="actions">
-            <a class="button button-primary" href="/diagnosis/">开始一次复位问诊</a>
+            <a class="button button-primary" href="/state/">开始状态识别</a>
             <a class="button button-secondary" href="#flow">看看完整路径</a>
           </div>
         </div>
         <div class="system-board" aria-label="复位闭环">
-          <span>复位诊断</span>
-          <span>生成方案</span>
+          <span>状态识别</span>
+          <span>复位路径</span>
           <span>选择修复方向</span>
-          <span>完成小动作</span>
-          <span>复盘复诊</span>
+          <span>记录复位过程</span>
+          <span>看见他人的复位历程</span>
         </div>
       </div>
     </section>
 
-    <section class="section compact-section" aria-labelledby="diagnosis-title">
+    <section class="section compact-section" aria-labelledby="state-title">
       <div class="section-heading">
         <p>Diagnosis</p>
-        <h2 id="diagnosis-title">当前状态诊断</h2>
+        <h2 id="state-title">状态识别</h2>
         <span>你不用解释清楚为什么。先从选项里找一个最像你现在的状态。</span>
       </div>
       <div class="state-grid">
         {disorderStates.map((state) => (
-          <a class="state-chip" href={`/diagnosis/?state=${encodeURIComponent(state.label)}`}>{state.label}</a>
+          <a class="state-chip" href={`/state/?state=${encodeURIComponent(state.label)}`}>{state.label}</a>
         ))}
       </div>
     </section>
@@ -49,7 +49,7 @@ import { disorderStates, resetFlow, resetSystems } from "@/data/site";
       <div class="section-heading">
         <p>Reset Path</p>
         <h2>我们按这个顺序来</h2>
-        <span>先诊断，再给方案。心理、认知、行为，是方案里的三条修复方向。</span>
+        <span>先识别状态，再给复位路径。心理、认知、行为，是路径里的三条修复方向。</span>
       </div>
       <div class="flow-grid">
         {resetFlow.map((item, index) => (
@@ -65,8 +65,8 @@ import { disorderStates, resetFlow, resetSystems } from "@/data/site";
     <section id="directions" class="section">
       <div class="section-heading">
         <p>Treatment Directions</p>
-        <h2>诊断之后，我们再进入三大修复方向</h2>
-        <span>你不用自己判断该去哪一页。问诊结束后，我会先帮你整理一个优先方向。</span>
+        <h2>状态识别之后，我们再进入三大修复方向</h2>
+        <span>你不用自己判断该去哪一页。状态对话结束后，我会先帮你整理一个优先方向。</span>
       </div>
       <div class="card-grid">
         {resetSystems.map((system) => (
@@ -84,10 +84,10 @@ import { disorderStates, resetFlow, resetSystems } from "@/data/site";
     <section class="section section-muted">
       <div class="section-heading">
         <p>Next</p>
-        <h2>现在先不用选治疗方向</h2>
-        <span>你先做一次复位问诊。等我们看清楚状态，再决定今天从心理、认知，还是行为开始。</span>
+        <h2>现在先不用选修复方向</h2>
+        <span>你先做一次状态识别。等我们看清楚状态，再决定今天从心理、认知，还是行为开始。</span>
       </div>
-      <a class="button button-primary" href="/diagnosis/">进入复位诊断</a>
+      <a class="button button-primary" href="/state/">进入状态识别</a>
     </section>
   </main>
   <SiteFooter />

@@ -16,7 +16,7 @@
 
 ## 项目概览
 
-根路径 `/` 是“复位”首页，定位为重建人生系统。当前站点地图是 `/diagnosis` 问诊诊断 -> `/plan` 复位方案 -> `/psychology`、`/cognition`、`/action` 三大修复方向 -> `/review` 复盘复诊。表单数据第一版保存到浏览器本地。跑步瘦身助手作为行为重构系统中的工具入口保留，详情页在 `/projects/slimming`，应用入口在 `/app/slimming`。
+根路径 `/` 是“复位”首页，定位为重建人生系统。当前站点地图是 `/state` 状态识别 -> `/path` 复位路径 -> `/psychology`、`/cognition`、`/action` 三大修复方向 -> `/records` 我的复位记录与 `/community` 复位社区 -> `/review` 复盘再校准。表单数据第一版保存到浏览器本地。跑步瘦身助手作为行为重构系统中的工具入口保留，详情页在 `/projects/slimming`，应用入口在 `/app/slimming`。
 
 跑步瘦身助手当前能力：
 

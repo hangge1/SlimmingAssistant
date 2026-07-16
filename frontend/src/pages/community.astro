@@ -1,0 +1,73 @@
+﻿---
+import SiteFooter from "@/components/SiteFooter.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import SiteLayout from "@/layouts/SiteLayout.astro";
+
+const journeys = [
+  {
+    state: "长期拖延",
+    direction: "行为重构",
+    before: "我一直以为自己是懒，但其实是任务太大，一想到开始就想逃。",
+    action: "我把动作缩到只打开文档 10 分钟，做完就停。",
+    change: "我没有立刻变自律，但我发现自己不是完全动不了。",
+  },
+  {
+    state: "情绪混乱",
+    direction: "心理重建",
+    before: "我经常突然崩掉，然后开始骂自己没用。",
+    action: "我先选出情绪是羞耻，再写下一句：我做错了，不等于我这个人不行。",
+    change: "那天问题没有全解决，但我没有继续攻击自己。",
+  },
+  {
+    state: "认知混乱",
+    direction: "认知重塑",
+    before: "我看了很多内容，但越看越乱，不知道自己到底要解决什么。",
+    action: "我只保留一个问题：为什么我知道很多方法，却还是无法行动？",
+    change: "我第一次意识到，自己缺的不是更多信息，而是一个更小的入口。",
+  },
+];
+---
+
+<SiteLayout title="复位社区 | 复位" description="你可以看到其他人公开的复位历程，知道不是只有你一个人会这样。">
+  <SiteHeader />
+  <main class="tool-page">
+    <section class="tool-hero">
+      <p class="eyebrow">复位社区</p>
+      <h1>复位社区</h1>
+      <p>这里不是成功展示，也不是打卡攀比。你只是看到：很多人也会失序，他们也在一点点把自己接回来。</p>
+    </section>
+
+    <section class="section path-directions">
+      <div class="section-heading">
+        <p>公开历程</p>
+        <h2>公开的复位历程</h2>
+        <span>每一条历程都只展示过程：当时卡在哪里，做了什么小动作，后来有什么变化。</span>
+      </div>
+      <div class="journey-grid">
+        {journeys.map((journey) => (
+          <article class="journey-card">
+            <div class="journey-tags">
+              <span>{journey.state}</span>
+              <span>{journey.direction}</span>
+            </div>
+            <h3>我当时卡在哪里</h3>
+            <p>{journey.before}</p>
+            <h3>我做了什么小动作</h3>
+            <p>{journey.action}</p>
+            <h3>后来有什么变化</h3>
+            <p>{journey.change}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="tool-panel community-note">
+      <div class="panel-heading">
+        <h2>公开之前，必须由用户自己决定</h2>
+        <p>默认不公开。以后如果加入发布功能，也必须先让用户明确选择公开，并且优先匿名展示。</p>
+      </div>
+    </section>
+  </main>
+  <SiteFooter />
+</SiteLayout>
+

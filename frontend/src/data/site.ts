@@ -27,22 +27,32 @@ export const resetSystems = [
 
 export const resetFlow = [
   {
-    title: "复位诊断",
-    href: "/diagnosis/",
-    description: "我们先一轮一轮问诊，看见你现在卡在哪里。",
+    title: "状态识别",
+    href: "/state/",
+    description: "我们先一轮一轮对话，看见你现在卡在哪里。",
   },
   {
-    title: "复位方案",
-    href: "/plan/",
+    title: "复位路径",
+    href: "/path/",
     description: "我会把你的状态整理成今天优先走的修复方向。",
   },
   {
     title: "三大修复方向",
-    href: "/plan/#directions",
-    description: "心理重建、认知重塑、行为重构，不再是并列内容，而是方案里的三条路径。",
+    href: "/path/#directions",
+    description: "心理重建、认知重塑、行为重构，不再是并列内容，而是路径里的三条方向。",
   },
   {
-    title: "复盘复诊",
+    title: "我的复位记录",
+    href: "/records/",
+    description: "看到你每一次状态识别、修复动作和复盘记录。",
+  },
+  {
+    title: "复位社区",
+    href: "/community/",
+    description: "看到其他人公开的复位历程，知道不是只有你一个人会这样。",
+  },
+  {
+    title: "复盘再校准",
     href: "/review/",
     description: "做完一小步后，我们再回来看看有没有好一点，是否需要调整方向。",
   },

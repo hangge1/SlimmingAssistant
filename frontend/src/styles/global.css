@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --paper: #f3f6f2;
   --surface: rgba(255, 255, 252, 0.9);
   --surface-solid: #fffffc;
@@ -1350,21 +1350,88 @@ a {
   grid-template-columns: minmax(0, 1.12fr) minmax(300px, 0.62fr);
 }
 
-.plan-layout {
+.path-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 0.54fr);
   gap: 18px;
   align-items: start;
 }
 
-.plan-summary {
+.path-summary {
   min-height: 330px;
   align-content: start;
 }
 
-.plan-directions {
+.path-directions {
   width: 100%;
   padding-inline: 0;
+}
+
+.records-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.journey-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.journey-card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.journey-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.journey-tags span {
+  width: fit-content;
+  border: 1px solid rgba(36, 118, 90, 0.18);
+  border-radius: 999px;
+  background: rgba(36, 118, 90, 0.08);
+  color: var(--green);
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.journey-card h3 {
+  margin: 8px 0 0;
+  font-size: 17px;
+}
+
+.journey-card p {
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.community-note {
+  margin-top: 18px;
+}
+
+.redirect-page {
+  width: min(100% - 32px, 680px);
+  min-height: 70vh;
+  display: grid;
+  place-content: center;
+  gap: 18px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .tool-panel {
@@ -1689,7 +1756,8 @@ a {
   .reset-hero-grid,
   .tool-grid,
   .tool-grid.wide-form,
-  .plan-layout {
+  .path-layout,
+  .journey-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1715,7 +1783,8 @@ a {
   .flow-grid,
   .choice-grid,
   .field-row,
-  .plan-layout {
+  .path-layout,
+  .records-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1727,3 +1796,4 @@ a {
     padding: 18px;
   }
 }
+

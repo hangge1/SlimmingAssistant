@@ -1,0 +1,108 @@
+---
+import SiteFooter from "@/components/SiteFooter.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import SiteLayout from "@/layouts/SiteLayout.astro";
+---
+
+<SiteLayout title="我的复位记录 | 复位" description="你可以在这里看到每一次状态识别、自我修复和复盘留下的记录。">
+  <SiteHeader />
+  <main class="tool-page">
+    <section class="tool-hero">
+      <p class="eyebrow">复位记录</p>
+      <h1>我的复位记录</h1>
+      <p>你不需要靠感觉判断自己有没有变化。我们把每一次状态识别、修复动作和复盘都留在这里。</p>
+    </section>
+
+    <section class="records-grid" id="records-root">
+      <article class="tool-panel">
+        <div class="panel-heading">
+          <h2>状态识别</h2>
+          <p>你每一次说出“我现在卡在哪里”，都算一次复位证据。</p>
+        </div>
+        <div class="saved-list" data-record-list="resetlife:user-states"></div>
+      </article>
+
+      <article class="tool-panel">
+        <div class="panel-heading">
+          <h2>心理重建</h2>
+          <p>这里会留下你看见情绪和自动想法的记录。</p>
+        </div>
+        <div class="saved-list" data-record-list="resetlife:reflections"></div>
+      </article>
+
+      <article class="tool-panel">
+        <div class="panel-heading">
+          <h2>认知重塑</h2>
+          <p>这里会留下你整理问题和概念的记录。</p>
+        </div>
+        <div class="saved-list" data-record-list="resetlife:cognition-records"></div>
+      </article>
+
+      <article class="tool-panel">
+        <div class="panel-heading">
+          <h2>行为重构</h2>
+          <p>这里会留下你选择、完成和复盘最小行动的记录。</p>
+        </div>
+        <div class="saved-list" data-record-list="resetlife:action-tasks"></div>
+      </article>
+
+      <article class="tool-panel">
+        <div class="panel-heading">
+          <h2>复盘再校准</h2>
+          <p>这里会留下你每次回看和调整方向的记录。</p>
+        </div>
+        <div class="saved-list" data-record-list="resetlife:reviews"></div>
+      </article>
+    </section>
+  </main>
+  <SiteFooter />
+</SiteLayout>
+
+<script is:inline>
+  function escapeHtml(value) {
+    return String(value || "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    })[char]);
+  }
+
+  function readItems(key) {
+    try {
+      return JSON.parse(localStorage.getItem(key) || "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  function titleFor(item) {
+    return item.title || item.actionName || item.question || item.relief || (item.states || []).join(" / ") || "一次复位记录";
+  }
+
+  function detailFor(item) {
+    return item.suggestion || item.reason || item.review || item.note || item.acceptance || item.feynmanConfidence || item.problem || "";
+  }
+
+  document.querySelectorAll("[data-record-list]").forEach((list) => {
+    const key = list.getAttribute("data-record-list");
+    const items = readItems(key);
+    if (!items.length) {
+      list.innerHTML = '<p class="empty-note">这里还没有记录。你可以先做一次状态识别。</p>';
+      return;
+    }
+    list.innerHTML = items
+      .slice(0, 8)
+      .map(
+        (item) => `
+          <article class="saved-item">
+            <span>${escapeHtml(item.date)}</span>
+            <strong>${escapeHtml(titleFor(item))}</strong>
+            ${detailFor(item) ? `<p>${escapeHtml(detailFor(item))}</p>` : ""}
+          </article>
+        `,
+      )
+      .join("");
+  });
+</script>
