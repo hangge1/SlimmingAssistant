@@ -53,7 +53,7 @@ scp -V
 推荐配置 SSH Key：
 
 ```bash
-ssh-keygen -t ed25519 -C "slimming-assistant-deploy"
+ssh-keygen -t ed25519 -C "reset-life-deploy"
 ssh-copy-id <ssh-user>@<server-host>
 ```
 
@@ -95,9 +95,9 @@ export DEPLOY_IDENTITY_FILE="$HOME/.ssh/id_ed25519"
 
 ```bash
 DEPLOY_ROOT=/www/wwwroot
-DEPLOY_CURRENT_LINK=/www/wwwroot/slimming-assistant-current
-DEPLOY_DATA_ROOT=/www/wwwroot/slimming-assistant-data
-DEPLOY_SQLITE_PATH=/www/wwwroot/slimming-assistant-data/slimming-assistant.sqlite
+DEPLOY_CURRENT_LINK=/www/wwwroot/reset-life-current
+DEPLOY_DATA_ROOT=/www/wwwroot/reset-life-data
+DEPLOY_SQLITE_PATH=/www/wwwroot/reset-life-data/reset-life.sqlite
 DEPLOY_APP_PORT=3000
 DEPLOY_START_SCRIPT=start:bt:3000
 DEPLOY_RESTART=1
@@ -126,16 +126,16 @@ npm run deploy:cloud
 2. 上传到服务器 `DEPLOY_ROOT`。
 3. 解压到独立版本目录。
 4. 使用共享 SQLite 路径执行迁移。
-5. 更新 `slimming-assistant-current` 指向新版本。
+5. 更新 `reset-life-current` 指向新版本。
 6. 重启 `DEPLOY_APP_PORT` 上的应用。
-7. 删除旧发布目录和残留压缩包，只保留最近 `DEPLOY_KEEP_RELEASES` 个 `slimming-assistant-数字版本` 目录。
+7. 删除旧发布目录和残留压缩包，只保留最近 `DEPLOY_KEEP_RELEASES` 个 `reset-life-数字版本` 目录。
 
 ## 部署后验证
 
 确认固定入口目录：
 
 ```bash
-ssh <ssh-user>@<server-host> "readlink -f /www/wwwroot/slimming-assistant-current"
+ssh <ssh-user>@<server-host> "readlink -f /www/wwwroot/reset-life-current"
 ```
 
 确认应用进程：
@@ -186,7 +186,7 @@ DEPLOY_BT_DOMAINS=www.hangge.xyz
 DEPLOY_BT_NODE_VERSION=v24.18.0
 DEPLOY_APP_PORT=3000
 DEPLOY_START_SCRIPT=start:bt:3000
-DEPLOY_SQLITE_PATH=/www/wwwroot/slimming-assistant-data/slimming-assistant.sqlite
+DEPLOY_SQLITE_PATH=/www/wwwroot/reset-life-data/reset-life.sqlite
 ```
 
 脚本会调用宝塔面板的 `mod.project.nodejs.nodeMod`，创建或更新 Node 项目记录，并强制把启动命令写成带 `SQLITE_PATH` 的形式，避免应用读到版本目录里的临时数据库。
@@ -196,11 +196,11 @@ DEPLOY_SQLITE_PATH=/www/wwwroot/slimming-assistant-data/slimming-assistant.sqlit
 如果用户数据像丢失，检查应用是否使用共享数据库：
 
 ```bash
-/www/wwwroot/slimming-assistant-data/slimming-assistant.sqlite
+/www/wwwroot/reset-life-data/reset-life.sqlite
 ```
 
 如果宝塔里仍然指向某个版本目录，把宝塔 Node 项目根目录固定为：
 
 ```bash
-/www/wwwroot/slimming-assistant-current
+/www/wwwroot/reset-life-current
 ```

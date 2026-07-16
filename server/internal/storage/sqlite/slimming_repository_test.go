@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"slimmingassistant/server/internal/slimming"
+	"resetlife/server/internal/slimming"
 )
 
 func TestSlimmingRepositoryReturnsUserScopedSummary(t *testing.T) {

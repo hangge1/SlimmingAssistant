@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"slimmingassistant/server/internal/auth"
-	"slimmingassistant/server/internal/settings"
+	"resetlife/server/internal/auth"
+	"resetlife/server/internal/settings"
 )
 
 type Channel string

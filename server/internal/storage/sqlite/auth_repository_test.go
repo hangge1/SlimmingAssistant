@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"slimmingassistant/server/internal/auth"
+	"resetlife/server/internal/auth"
 )
 
 func TestAuthRepositoryResolvesActiveSessionAndTouchesLastSeen(t *testing.T) {

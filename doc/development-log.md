@@ -282,3 +282,39 @@ npm run build
 Chrome 桌面端截图检查：首页与项目详情页首屏布局正常
 Chrome 移动端截图检查：首页首屏和认知板块布局正常
 ```
+
+## 2026-07-16 项目统一改名为 ResetLife
+
+### 调整背景
+
+站点已经从单一“跑步瘦身助手”转为个人 Web 站点，跑步瘦身助手只是项目板块中的一个 item。继续使用 `SlimmingAssistant` 作为仓库和工程名会让项目定位不清晰，因此本轮将当前工程统一改名为 `ResetLife`。
+
+### 已完成调整
+
+- 根项目包名从 `slimming-assistant` 调整为 `reset-life`。
+- Go module 从 `slimmingassistant/server` 调整为 `resetlife/server`，同步更新所有 Go import。
+- Go API 二进制名从 `slimmingassistant-api` 调整为 `resetlife-api`。
+- 发布包名前缀从 `slimming-assistant-go-astro` 调整为 `reset-life-go-astro`。
+- 默认宝塔部署目录从 `/www/wwwroot/slimming-assistant` 调整为 `/www/wwwroot/reset-life`。
+- 部署脚本、发布脚本、README、部署文档和自动化部署文档同步新名称。
+- BMad 当前项目配置中的 `project_name` 调整为 `ResetLife`。
+
+### 保留边界
+
+- `_bmad-output/` 中的历史 PRD、UX、架构和 story 资料继续保留 `SlimmingAssistant`，因为这些资料描述的是早期跑步瘦身助手项目，不作为当前仓库名称来源。
+- 站点内“跑步瘦身助手”的中文项目名称不变，它仍然是 ResetLife 项目板块中的一个应用。
+
+### 防回归约定
+
+- 当前仓库、发布包、部署根目录和 Go module 均以 `ResetLife/reset-life/resetlife` 为准。
+- 后续新增部署文档时不要再使用 `/www/wwwroot/slimming-assistant` 作为默认目录。
+- 后续新增 Go import 时必须使用 `resetlife/server/...`。
+
+### 验证记录
+
+```text
+npm run check
+npm run build
+npm run release
+发布包生成：dist/releases/reset-life-go-astro-0.1.0-20260716T015020.tar.gz
+```

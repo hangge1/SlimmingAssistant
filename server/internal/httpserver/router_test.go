@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"slimmingassistant/server/internal/auth"
-	"slimmingassistant/server/internal/settings"
-	"slimmingassistant/server/internal/slimming"
+	"resetlife/server/internal/auth"
+	"resetlife/server/internal/settings"
+	"resetlife/server/internal/slimming"
 )
 
 func TestHealthRoutesReturnStableJSON(t *testing.T) {

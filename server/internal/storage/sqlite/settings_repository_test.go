@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"slimmingassistant/server/internal/settings"
+	"resetlife/server/internal/settings"
 )
 
 func TestSettingsRepositorySavesAndLoadsUserScopedSettings(t *testing.T) {

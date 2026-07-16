@@ -3,7 +3,7 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { basename, resolve } from "node:path";
 
 const projectRoot = resolve(import.meta.dirname, "..");
-const defaultAppRoot = "/www/wwwroot/slimming-assistant";
+const defaultAppRoot = "/www/wwwroot/reset-life";
 
 const args = new Set(process.argv.slice(2));
 const skipRelease = args.has("--skip-release");
@@ -216,7 +216,7 @@ const remoteCommand = [
   `previous_release=$(readlink -f ${shellQuote(currentLink)} 2>/dev/null || true)`,
   `mkdir -p ${shellQuote(dataRoot)}`,
   `cd ${shellQuote(remotePackageRoot)}`,
-  `chmod +x ./api/slimmingassistant-api ./scripts/*.sh`,
+  `chmod +x ./api/resetlife-api ./scripts/*.sh`,
   `if [ -n "$previous_release" ] && [ -f "$previous_release/.env" ]; then cp -p "$previous_release/.env" ./.env; else token=${shellQuote(internalReminderToken)}; if [ -z "$token" ]; then token=$(openssl rand -hex 24 2>/dev/null || date +%s%N); fi; printf '%s\\n' API_ADDR=${shellQuote(`127.0.0.1:${appPort}`)} DATA_DIR=${shellQuote(dataRoot)} SQLITE_PATH=${shellQuote(sqlitePath)} INTERNAL_REMINDER_TOKEN="$token" > ./.env; fi`,
   `echo "[deploy] switch current link"`,
   `ln -sfn ${shellQuote(remotePackageRoot)} ${shellQuote(currentLink)}`,
@@ -236,8 +236,8 @@ const remoteCommand = [
       ]
     : []),
   `echo "[deploy] clean release archives and old directories"`,
-  `find ${shellQuote(deployRoot)} -maxdepth 1 -type f \\( -name 'slimming-assistant-go-astro-*.tar.gz' -o -name 'slimming-assistant-go-astro-*.zip' \\) -delete`,
-  `find ${shellQuote(deployRoot)} -maxdepth 1 -type d -name 'slimming-assistant-go-astro-*' -printf '%T@ %p\\n' | sort -rn | awk 'NR > ${keepReleaseCount} { sub(/^[^ ]+ /, ""); print }' | while IFS= read -r old_dir; do rm -rf -- "$old_dir"; done`,
+  `find ${shellQuote(deployRoot)} -maxdepth 1 -type f \\( -name 'reset-life-go-astro-*.tar.gz' -o -name 'reset-life-go-astro-*.zip' \\) -delete`,
+  `find ${shellQuote(deployRoot)} -maxdepth 1 -type d -name 'reset-life-go-astro-*' -printf '%T@ %p\\n' | sort -rn | awk 'NR > ${keepReleaseCount} { sub(/^[^ ]+ /, ""); print }' | while IFS= read -r old_dir; do rm -rf -- "$old_dir"; done`,
   `echo`,
   `echo "Deployment prepared at ${remotePackageRoot}"`,
   `echo "Current link points to ${currentLink}"`,

@@ -132,7 +132,7 @@ test("web and server trees do not import Next runtime APIs", () => {
 test("cloud deployment uses the Go binary release without remote Node runtime steps", () => {
   assert.match(deployCloudSource, /DEPLOY_APP_PORT \?\? "8080"/);
   assert.match(deployCloudSource, /restart-api\.sh/);
-  assert.match(deployCloudSource, /api\/slimmingassistant-api/);
+  assert.match(deployCloudSource, /api\/resetlife-api/);
   assert.match(deployCloudSource, /\/api\/healthz/);
   assert.doesNotMatch(deployCloudSource, /npm run prepare:bt|npm run .*start:bt|ensure-bt-node-project|\.next-start/);
 });

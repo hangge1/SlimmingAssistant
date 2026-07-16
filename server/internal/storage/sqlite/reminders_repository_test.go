@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"slimmingassistant/server/internal/reminders"
+	"resetlife/server/internal/reminders"
 )
 
 func TestRemindersRepositoryCreatesUpdatesAndReadsEvents(t *testing.T) {

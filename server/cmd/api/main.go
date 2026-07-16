@@ -10,13 +10,13 @@ import (
 	"syscall"
 	"time"
 
-	"slimmingassistant/server/internal/auth"
-	"slimmingassistant/server/internal/config"
-	"slimmingassistant/server/internal/httpserver"
-	"slimmingassistant/server/internal/reminders"
-	"slimmingassistant/server/internal/settings"
-	"slimmingassistant/server/internal/slimming"
-	storagesqlite "slimmingassistant/server/internal/storage/sqlite"
+	"resetlife/server/internal/auth"
+	"resetlife/server/internal/config"
+	"resetlife/server/internal/httpserver"
+	"resetlife/server/internal/reminders"
+	"resetlife/server/internal/settings"
+	"resetlife/server/internal/slimming"
+	storagesqlite "resetlife/server/internal/storage/sqlite"
 )
 
 func main() {

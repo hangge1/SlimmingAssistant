@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"slimmingassistant/server/internal/auth"
-	"slimmingassistant/server/internal/settings"
+	"resetlife/server/internal/auth"
+	"resetlife/server/internal/settings"
 )
 
 func TestServiceCreatesInAppReminderWhenRecordsMissing(t *testing.T) {

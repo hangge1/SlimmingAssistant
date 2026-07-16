@@ -16,7 +16,7 @@ const distRoot = resolve(projectRoot, "dist");
 const releasesRoot = resolve(distRoot, "releases");
 const stagingRoot = resolve(distRoot, "go-astro-release-staging");
 const packageRoot = resolve(stagingRoot, packageBaseName);
-const apiBinaryName = targetOs === "windows" ? "slimmingassistant-api.exe" : "slimmingassistant-api";
+const apiBinaryName = targetOs === "windows" ? "resetlife-api.exe" : "resetlife-api";
 
 function pathSeparator() {
   return process.platform === "win32" ? "\\" : "/";
@@ -131,8 +131,8 @@ function writeDeployFiles() {
     resolve(packageRoot, ".env.example"),
     [
       "API_ADDR=127.0.0.1:8080",
-      "DATA_DIR=/www/wwwroot/slimming-assistant/data",
-      "SQLITE_PATH=/www/wwwroot/slimming-assistant/data/app.sqlite",
+      "DATA_DIR=/www/wwwroot/reset-life/data",
+      "SQLITE_PATH=/www/wwwroot/reset-life/data/app.sqlite",
       "INTERNAL_REMINDER_TOKEN=change-this-token",
       "",
     ].join("\n"),
@@ -145,7 +145,7 @@ function writeDeployFiles() {
       "set -euo pipefail",
       "cd \"$(dirname \"$0\")/..\"",
       "mkdir -p \"${DATA_DIR:-./data}\"",
-      "nohup ./api/slimmingassistant-api > ./api/api.log 2>&1 &",
+      "nohup ./api/resetlife-api > ./api/api.log 2>&1 &",
       "echo $! > ./api/api.pid",
       "",
     ].join("\n"),
@@ -191,7 +191,7 @@ function writeDeployFiles() {
       "server {",
       "    listen 80;",
       "    server_name example.com;",
-      "    root /www/wwwroot/slimming-assistant/current/public;",
+      "    root /www/wwwroot/reset-life/current/public;",
       "    index index.html;",
       "",
       "    location /api/ {",
@@ -217,16 +217,16 @@ function writeDeployFiles() {
       "",
       "目录说明：",
       "- `public/`：Astro 静态站点，可作为宝塔网站根目录。",
-      "- `api/slimmingassistant-api`：Linux Go API 二进制。",
+      "- `api/resetlife-api`：Linux Go API 二进制。",
       "- `scripts/restart-api.sh`：加载 `.env` 后重启 API。",
       "- `nginx-site.conf.example`：`/api/` 反代到 Go API 的 Nginx 示例。",
       "",
       "部署要点：",
-      "1. 解压到服务器目录，例如 `/www/wwwroot/slimming-assistant/releases/<version>`。",
+      "1. 解压到服务器目录，例如 `/www/wwwroot/reset-life/releases/<version>`。",
       "2. 将 `.env.example` 复制为 `.env`，并按服务器路径调整 `DATA_DIR` / `SQLITE_PATH` / `INTERNAL_REMINDER_TOKEN`。",
       "3. 在宝塔网站配置中把根目录指向本包的 `public/`。",
       "4. 在 Nginx 配置中加入 `/api/` 反代，目标为 `http://127.0.0.1:8080`。",
-      "5. 执行 `chmod +x scripts/*.sh api/slimmingassistant-api && ./scripts/restart-api.sh`。",
+      "5. 执行 `chmod +x scripts/*.sh api/resetlife-api && ./scripts/restart-api.sh`。",
       "6. 如需服务器定时执行提醒，可用宝塔计划任务请求 `POST /api/reminders/run`，请求头带 `X-Internal-Reminder-Token: <INTERNAL_REMINDER_TOKEN>`。",
       "",
     ].join("\n"),

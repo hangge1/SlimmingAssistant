@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"slimmingassistant/server/internal/auth"
-	"slimmingassistant/server/internal/reminders"
-	"slimmingassistant/server/internal/settings"
-	"slimmingassistant/server/internal/slimming"
+	"resetlife/server/internal/auth"
+	"resetlife/server/internal/reminders"
+	"resetlife/server/internal/settings"
+	"resetlife/server/internal/slimming"
 )
 
 type RouterConfig struct {
@@ -192,7 +192,7 @@ type route struct {
 }
 
 const (
-	serviceName    = "slimmingassistant-api"
+	serviceName    = "resetlife-api"
 	serviceVersion = "0.1.0"
 )
 

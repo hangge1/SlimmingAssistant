@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"slimmingassistant/server/internal/settings"
+	"resetlife/server/internal/settings"
 )
 
 type SettingsRepository struct {

@@ -1,4 +1,4 @@
-# SlimmingAssistant
+# ResetLife
 
 ## 当前架构
 
@@ -52,7 +52,7 @@ npm run release
 发布包包含：
 
 - `web/public/`：Astro 开发期静态资源；发布包内会生成 `public/` 静态站点目录
-- `api/slimmingassistant-api`：Linux Go API 二进制
+- `api/resetlife-api`：Linux Go API 二进制
 - `scripts/restart-api.sh`：加载 `.env` 后重启 API
 - `nginx-site.conf.example`：宝塔/Nginx 反代示例
 - `README_DEPLOY.md`：服务器部署说明
@@ -60,7 +60,7 @@ npm run release
 典型服务器目录：
 
 ```text
-/www/wwwroot/slimming-assistant/
+/www/wwwroot/reset-life/
   current -> releases/<version>
   releases/
   data/app.sqlite
@@ -69,7 +69,7 @@ npm run release
 宝塔站点根目录指向：
 
 ```text
-/www/wwwroot/slimming-assistant/current/public
+/www/wwwroot/reset-life/current/public
 ```
 
 Nginx 需要把 `/api/` 反向代理到 Go API，例如：
@@ -98,8 +98,8 @@ Go API 常用环境变量：
 
 ```bash
 API_ADDR=127.0.0.1:8080
-DATA_DIR=/www/wwwroot/slimming-assistant/data
-SQLITE_PATH=/www/wwwroot/slimming-assistant/data/app.sqlite
+DATA_DIR=/www/wwwroot/reset-life/data
+SQLITE_PATH=/www/wwwroot/reset-life/data/app.sqlite
 INTERNAL_REMINDER_TOKEN=change-this-token
 REMINDER_TIME_ZONE=Asia/Shanghai
 REMINDER_CHECK_INTERVAL_MS=60000

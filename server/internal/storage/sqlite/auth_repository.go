@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"slimmingassistant/server/internal/auth"
+	"resetlife/server/internal/auth"
 )
 
 type AuthRepository struct {

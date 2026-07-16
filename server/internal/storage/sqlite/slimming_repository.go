@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"slimmingassistant/server/internal/slimming"
+	"resetlife/server/internal/slimming"
 )
 
 type SlimmingRepository struct {

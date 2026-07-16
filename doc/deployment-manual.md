@@ -13,13 +13,13 @@ npm run release
 发布包生成在：
 
 ```text
-dist/releases/slimming-assistant-go-astro-<version>-<timestamp>.tar.gz
+dist/releases/reset-life-go-astro-<version>-<timestamp>.tar.gz
 ```
 
 ## 2. 服务器目录建议
 
 ```text
-/www/wwwroot/slimming-assistant/
+/www/wwwroot/reset-life/
   current -> releases/<version>
   releases/
   data/app.sqlite
@@ -28,10 +28,10 @@ dist/releases/slimming-assistant-go-astro-<version>-<timestamp>.tar.gz
 ## 3. 手动部署
 
 ```bash
-mkdir -p /www/wwwroot/slimming-assistant/releases
-tar -xzf slimming-assistant-go-astro-*.tar.gz -C /www/wwwroot/slimming-assistant/releases
-ln -sfn /www/wwwroot/slimming-assistant/releases/<解压后的目录名> /www/wwwroot/slimming-assistant/current
-cd /www/wwwroot/slimming-assistant/current
+mkdir -p /www/wwwroot/reset-life/releases
+tar -xzf reset-life-go-astro-*.tar.gz -C /www/wwwroot/reset-life/releases
+ln -sfn /www/wwwroot/reset-life/releases/<解压后的目录名> /www/wwwroot/reset-life/current
+cd /www/wwwroot/reset-life/current
 cp .env.example .env
 ```
 
@@ -39,8 +39,8 @@ cp .env.example .env
 
 ```bash
 API_ADDR=127.0.0.1:8080
-DATA_DIR=/www/wwwroot/slimming-assistant/data
-SQLITE_PATH=/www/wwwroot/slimming-assistant/data/app.sqlite
+DATA_DIR=/www/wwwroot/reset-life/data
+SQLITE_PATH=/www/wwwroot/reset-life/data/app.sqlite
 INTERNAL_REMINDER_TOKEN=请替换为随机长字符串
 REMINDER_TIME_ZONE=Asia/Shanghai
 ```
@@ -48,7 +48,7 @@ REMINDER_TIME_ZONE=Asia/Shanghai
 启动或重启 Go API：
 
 ```bash
-chmod +x api/slimmingassistant-api scripts/*.sh
+chmod +x api/resetlife-api scripts/*.sh
 ./scripts/restart-api.sh
 curl http://127.0.0.1:8080/api/healthz
 ```
@@ -58,7 +58,7 @@ curl http://127.0.0.1:8080/api/healthz
 宝塔网站根目录指向：
 
 ```text
-/www/wwwroot/slimming-assistant/current/public
+/www/wwwroot/reset-life/current/public
 ```
 
 Nginx 增加 `/api/` 反向代理：
@@ -92,7 +92,7 @@ DEPLOY_HOST=your.server DEPLOY_USER=root npm run deploy:cloud
 ```bash
 DEPLOY_PORT=22
 DEPLOY_IDENTITY_FILE=~/.ssh/id_rsa
-DEPLOY_APP_ROOT=/www/wwwroot/slimming-assistant
+DEPLOY_APP_ROOT=/www/wwwroot/reset-life
 DEPLOY_APP_PORT=8080
 DEPLOY_INTERNAL_REMINDER_TOKEN=随机长字符串
 DEPLOY_KEEP_RELEASES=3
@@ -114,7 +114,7 @@ DEPLOY_KEEP_RELEASES=3
 
 ```bash
 curl http://127.0.0.1:8080/api/healthz
-tail -80 /www/wwwroot/slimming-assistant/current/api/api.log
+tail -80 /www/wwwroot/reset-life/current/api/api.log
 ```
 
 检查端口：
@@ -126,7 +126,7 @@ ss -lntp | grep :8080
 停止 API：
 
 ```bash
-cd /www/wwwroot/slimming-assistant/current
+cd /www/wwwroot/reset-life/current
 ./scripts/stop-api.sh
 ```
 

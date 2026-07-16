@@ -1,4 +1,4 @@
-module slimmingassistant/server
+module resetlife/server
 
 go 1.25.0
 

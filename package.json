@@ -1,5 +1,5 @@
 {
-  "name": "slimming-assistant",
+  "name": "reset-life",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -23,7 +23,7 @@
     "web:build": "npm --prefix web run build",
     "web:check": "npm --prefix web run check",
     "api:dev": "cd server && go run ./cmd/api",
-    "api:build": "cd server && go build -trimpath -o ../dist/local/slimmingassistant-api ./cmd/api",
+    "api:build": "cd server && go build -trimpath -o ../dist/local/resetlife-api ./cmd/api",
     "api:test": "cd server && go test ./...",
     "lint": "eslint scripts/create-go-astro-release-package.mjs scripts/deploy-cloud.mjs scripts/dev-go-astro.mjs scripts/start-go-astro.mjs tests/go-astro-default.test.mjs web/src/**/*.ts",
     "typecheck": "npm run web:check",

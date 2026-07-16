@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"slimmingassistant/server/internal/auth"
-	"slimmingassistant/server/internal/reminders"
+	"resetlife/server/internal/auth"
+	"resetlife/server/internal/reminders"
 )
 
 type RemindersRepository struct {
