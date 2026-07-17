@@ -5,38 +5,38 @@ import SiteLayout from "@/layouts/SiteLayout.astro";
 import { resetSystems } from "@/data/site";
 ---
 
-<SiteLayout title="复位路径 | 复位" description="状态识别之后，我们把你的状态整理成今天可以走的一条修复路径。">
+<SiteLayout title="复位报告 | 复位" description="自我定位之后，我们把你的秩序结构整理成一份可行动的复位报告。">
   <SiteHeader />
   <main class="tool-page">
     <section class="tool-hero">
-      <p class="eyebrow">复位路径</p>
-      <h1>复位路径</h1>
-      <p>状态对话之后，我们先不急着做很多事。我们只整理：你现在在哪里，今天先从哪条修复方向开始。</p>
+      <p class="eyebrow">复位报告</p>
+      <h1>你的复位报告</h1>
+      <p>自我定位之后，我们先不急着做很多事。我们只看清：你现在主要乱在哪里，今天先从哪条自我修复方向开始。</p>
     </section>
 
     <section class="path-layout">
       <article class="tool-panel path-summary" id="path-summary" aria-live="polite">
         <div class="panel-heading">
-          <h2>我先帮你把刚才的状态对话整理一下</h2>
-          <p>如果这里还没有内容，你可以先做一次复位状态识别。</p>
+          <h2>我先帮你把刚才的自我定位整理一下</h2>
+          <p>如果这里还没有内容，你可以先做一次自我定位。</p>
         </div>
         <div class="result-box">
-          还没有可用的复位路径。我们先从状态对话开始。
+          还没有可用的复位报告。我们先从自我定位开始。
         </div>
         <div class="actions">
-          <a class="button button-primary" href="/state/">开始复位状态识别</a>
+          <a class="button button-primary" href="/state/">开始自我定位</a>
         </div>
       </article>
 
       <aside class="tool-panel">
         <div class="panel-heading">
           <h2>今天只需要一个优先方向</h2>
-          <p>你不用同时处理心理、认知和行为。先按路径走一条路，做完再回来复盘。</p>
+          <p>你不用同时处理心理、认知和行动。先按报告里最明显的一条路走，做完再回来复盘。</p>
         </div>
         <div class="acceptance-list">
-          <span>如果你很难受，先走心理重建。</span>
-          <span>如果你很混乱，先走认知重塑。</span>
-          <span>如果你动不起来，先走行为重构。</span>
+          <span>如果你很难受，先走心理复位。</span>
+          <span>如果你很混乱，先走认知复位。</span>
+          <span>如果你动不起来，先走行动复位。</span>
         </div>
       </aside>
     </section>
@@ -44,8 +44,8 @@ import { resetSystems } from "@/data/site";
     <section id="directions" class="section path-directions">
       <div class="section-heading">
         <p>修复方向</p>
-        <h2>三大修复方向</h2>
-        <span>这三条路不是内容分类，而是你状态识别之后可能进入的修复路径。</span>
+        <h2>自我修复的三条方向</h2>
+        <span>这三条路不是内容分类，而是你完成自我定位之后可能进入的修复路径。</span>
       </div>
       <div class="card-grid">
         {resetSystems.map((system) => (
@@ -84,23 +84,43 @@ import { resetSystems } from "@/data/site";
     }
   }
 
+  function renderBars(scores) {
+    if (!Array.isArray(scores) || !scores.length) return "";
+    return `
+      <div class="order-bars">
+        ${scores
+          .map(
+            (item) => `
+              <div class="order-bar">
+                <span>${escapeHtml(item.title || "")}</span>
+                <strong>${escapeHtml(item.percent ?? 0)}%</strong>
+                <i style="--value: ${escapeHtml(item.percent ?? 0)}%"></i>
+              </div>
+            `,
+          )
+          .join("")}
+      </div>
+    `;
+  }
+
   const plan = readPlan();
   if (plan) {
     summary.innerHTML = `
       <div class="panel-heading">
-        <h2>这是你这次的复位路径</h2>
-        <p>先按这条路走，不需要同时解决全部问题。</p>
+        <h2>这是你这次的复位报告</h2>
+        <p>先按报告里的优先方向走，不需要同时解决全部问题。</p>
       </div>
       <div class="result-box">
-        <strong>${escapeHtml(plan.direction?.title || "心理重建")}</strong>
+        <strong>${escapeHtml(plan.conclusion?.title || plan.direction?.title || "心理复位")}</strong>
+        ${renderBars(plan.scores || [])}
+        <p>${escapeHtml(plan.conclusion?.mechanism || "我们先把当前状态看清楚，再走下一步。")}</p>
         <p>${escapeHtml(plan.direction?.reason || "我们先从一个能开始的小动作走起。")}</p>
-        <p>你刚才选到的状态：${escapeHtml((plan.states || []).join(" / "))}</p>
-        <p>最受影响的区域：${escapeHtml(plan.lifeArea || "暂未选择")}</p>
-        <p>当前阶段：${escapeHtml(plan.stage || "看见自己")}</p>
+        <p>一开始你更像：${escapeHtml(plan.initialEntry?.label || "暂未选择")}</p>
+        <p>你刚才选到的明显状态：${escapeHtml((plan.states || []).slice(0, 8).join(" / ") || "暂未选择")}</p>
         ${plan.note ? `<p>你补充说：${escapeHtml(plan.note)}</p>` : ""}
       </div>
       <div class="actions">
-        <a class="button button-primary" href="${escapeHtml(plan.direction?.href || "/psychology/")}">进入${escapeHtml(plan.direction?.title || "心理重建")}</a>
+        <a class="button button-primary" href="${escapeHtml(plan.direction?.href || "/psychology/")}">进入${escapeHtml(plan.direction?.title || "心理复位")}</a>
         <a class="button button-secondary" href="/review/">做完后回来复盘</a>
       </div>
     `;

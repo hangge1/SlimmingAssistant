@@ -1,167 +1,188 @@
-﻿---
-import SiteFooter from "@/components/SiteFooter.astro";
+---
 import SiteHeader from "@/components/SiteHeader.astro";
 import SiteLayout from "@/layouts/SiteLayout.astro";
-import { disorderStates, lifeAreas, resetStages } from "@/data/site";
+import { orderDimensions, positioningEntrances } from "@/data/site";
 ---
 
-<SiteLayout title="状态识别 | 复位" description="我们像状态对话一样，一轮一轮看见你现在卡在哪里。">
+<SiteLayout title="自我定位 | 复位" description="通过 3D 人生秩序地图，把状态碎片放回心理、认知、行动三大秩序里。">
   <SiteHeader />
-  <main class="tool-page">
-    <section class="tool-hero">
-      <p class="eyebrow">状态识别</p>
-      <h1>状态识别</h1>
-      <p>我们不一次性问完所有问题。你跟着卡片一轮一轮选，哪里说不准，就用自己的话补一句。</p>
-    </section>
+  <main class="positioning-game-page">
+    <section class="positioning-stage" aria-labelledby="positioning-title">
+      <canvas id="order-map-canvas" class="order-map-canvas" aria-label="人生秩序 3D 地图"></canvas>
 
-    <section class="tool-grid dialogue-layout">
-      <form class="tool-panel dialogue-panel" id="state-form">
-        <div class="dialogue-progress" aria-label="状态识别进度">
-          <span class="progress-dot is-active" data-progress-dot></span>
-          <span class="progress-dot" data-progress-dot></span>
-          <span class="progress-dot" data-progress-dot></span>
-          <span class="progress-dot" data-progress-dot></span>
-          <span class="progress-dot" data-progress-dot></span>
-          <span class="progress-dot" data-progress-dot></span>
+      <div class="positioning-overlay">
+        <div class="positioning-intro">
+          <p class="eyebrow">自我定位</p>
+          <h1 id="positioning-title">把散落的状态碎片，放回你的人生秩序地图</h1>
+          <p>
+            你不用像填问卷一样分析自己。看到像你的碎片，就点一下。我们会慢慢看清：现在主要是心理不稳、认知不清，还是行动断裂。
+          </p>
         </div>
 
-        <section class="dialogue-card is-active" data-dialogue-card>
-          <span class="dialogue-step">第 1 轮</span>
-          <div class="doctor-message">
-            <strong>我们先慢一点。</strong>
-            <p>你不需要马上解释为什么会这样。我们先像面对面对话一样，只看你现在最明显的感受。</p>
-          </div>
-          <div class="dialogue-actions">
-            <button class="button button-primary" type="button" data-next>开始</button>
-          </div>
-        </section>
-
-        <section class="dialogue-card" data-dialogue-card hidden>
-          <span class="dialogue-step">第 2 轮</span>
+        <aside class="map-panel map-panel-start" aria-label="开始定位">
           <div class="panel-heading">
-            <h2>你现在最像哪种失序状态？</h2>
-            <p>可以多选。先选最刺眼、最影响你的那个；如果选项不准，你可以自己写。</p>
+            <h2>先选一个起点</h2>
+            <p>凭直觉选就好。它不是最终结论，只是告诉我从哪里陪你开始。</p>
           </div>
-          <div class="choice-grid">
-            {disorderStates.map((state) => (
-              <label class="choice-card">
-                <input type="checkbox" name="state" value={state.label} data-suggestion={state.suggestion} />
-                <span>{state.label}</span>
-              </label>
+          <div class="entry-stack" id="entry-stack">
+            {positioningEntrances.map((entry) => (
+              <button class="entry-button" type="button" data-entry={entry.value}>
+                <span>{entry.direction}</span>
+                <strong>{entry.label}</strong>
+              </button>
             ))}
           </div>
-          <label class="custom-field">
-            如果都不像，你可以自己写一个状态
-            <input name="customState" placeholder="例如：我只是觉得整个人很散，什么都抓不住" />
+          <label class="map-custom-field">
+            如果都不像，你可以自己说一句
+            <input id="custom-entry" placeholder="例如：我整个人很散，什么都抓不住" />
           </label>
-          <p class="form-message" data-step-error></p>
-          <div class="dialogue-actions">
-            <button class="button button-secondary" type="button" data-prev>上一轮</button>
-            <button class="button button-primary" type="button" data-next>继续</button>
-          </div>
-        </section>
+        </aside>
 
-        <section class="dialogue-card" data-dialogue-card hidden>
-          <span class="dialogue-step">第 3 轮</span>
-          <div class="panel-heading">
-            <h2>现在最受影响的是哪一块？</h2>
-            <p>我们先找到失序最明显的位置，不急着处理全部生活。</p>
+        <div class="selected-order-banner" id="selected-order-banner" hidden>
+          <div>
+            <span>当前正在定位</span>
+            <strong id="selected-order-title">心理秩序</strong>
+            <p id="selected-order-copy">按住左键拖动旋转，滚动鼠标滚轮可以拉近或拉远。</p>
           </div>
-          <div class="choice-grid">
-            {lifeAreas.map((area) => (
-              <label class="choice-card">
-                <input type="radio" name="lifeArea" value={area} />
-                <span>{area}</span>
-              </label>
+          <button class="selected-order-back" type="button" id="reset-entry" aria-label="返回重新选择">
+            <span aria-hidden="true">←</span>
+            <em>重选</em>
+          </button>
+        </div>
+
+        <aside class="map-panel map-panel-guide" aria-live="polite">
+          <div class="panel-heading">
+            <h2 id="guide-title">现在点一个状态碎片</h2>
+            <p id="guide-copy">它们会漂浮在地图上。你不需要全部选择，先点最像你的几个。</p>
+          </div>
+          <div class="map-progress">
+            <span id="selected-count">0 个碎片已归位</span>
+            <button class="button button-secondary" type="button" id="finish-positioning">生成我的复位报告</button>
+          </div>
+        </aside>
+      </div>
+
+      <div class="fragment-cloud" id="fragment-cloud" aria-label="状态碎片"></div>
+
+      <section class="fragment-dialogue" id="fragment-dialogue" aria-live="polite" hidden>
+        <span id="fragment-domain">状态碎片</span>
+        <h2 id="fragment-title">这句话像不像你现在的状态？</h2>
+        <p>不用证明，也不用解释。你只要选一个接近程度。</p>
+        <div class="intensity-actions">
+          <button type="button" data-intensity="1">有一点像</button>
+          <button type="button" data-intensity="2">很像</button>
+          <button type="button" data-intensity="3">几乎就是我</button>
+        </div>
+        <button class="quiet-button" type="button" id="skip-fragment">先放过这个</button>
+      </section>
+    </section>
+
+    <section class="positioning-lab" aria-label="自定义状态碎片">
+      <div class="section-heading">
+        <p>Custom Fragment</p>
+        <h2>如果有一句话没出现在地图里，你可以自己放进去</h2>
+        <span>选择题优先，但你仍然可以用自己的话补充。你的表达不会丢掉。</span>
+      </div>
+      <div class="custom-fragment-panel">
+        <label>
+          你自己的状态碎片
+          <input id="custom-fragment-text" placeholder="例如：我总觉得自己快要撑不住了，但又不知道该停在哪里" />
+        </label>
+        <label>
+          你觉得它更靠近哪里
+          <select id="custom-fragment-dimension">
+            {orderDimensions.map((dimension) => (
+              <option value={dimension.id}>{dimension.title}</option>
             ))}
-          </div>
-          <label class="custom-field">
-            也可以写你自己的说法
-            <input name="customLifeArea" placeholder="例如：家里一团乱，整个人也跟着乱" />
-          </label>
-          <p class="form-message" data-step-error></p>
-          <div class="dialogue-actions">
-            <button class="button button-secondary" type="button" data-prev>上一轮</button>
-            <button class="button button-primary" type="button" data-next>继续</button>
-          </div>
-        </section>
+          </select>
+        </label>
+        <label>
+          接近程度
+          <select id="custom-fragment-intensity">
+            <option value="1">有一点像</option>
+            <option value="2">很像</option>
+            <option value="3">几乎就是我</option>
+          </select>
+        </label>
+        <button class="button button-primary" type="button" id="add-custom-fragment">放进地图</button>
+      </div>
+    </section>
 
-        <section class="dialogue-card" data-dialogue-card hidden>
-          <span class="dialogue-step">第 4 轮</span>
-          <div class="panel-heading">
-            <h2>你觉得自己现在停在哪一步？</h2>
-            <p>这不是考试。只是帮我们判断：今天应该先看见、先理解，还是先做一个小动作。</p>
-          </div>
-          <div class="choice-grid">
-            {resetStages.map((stage) => (
-              <label class="choice-card">
-                <input type="radio" name="stage" value={stage} />
-                <span>{stage}</span>
-              </label>
-            ))}
-          </div>
-          <label class="custom-field">
-            如果这些阶段都不准，你可以自己描述
-            <input name="customStage" placeholder="例如：我像是还没准备好面对问题" />
-          </label>
-          <p class="form-message" data-step-error></p>
-          <div class="dialogue-actions">
-            <button class="button button-secondary" type="button" data-prev>上一轮</button>
-            <button class="button button-primary" type="button" data-next>继续</button>
-          </div>
-        </section>
-
-        <section class="dialogue-card" data-dialogue-card hidden>
-          <span class="dialogue-step">第 5 轮</span>
-          <div class="panel-heading">
-            <h2>还有没有一句话，是你想补给自己的？</h2>
-            <p>可以留空。也可以只写一句很短的话，像是“我现在真的很累”。</p>
-          </div>
-          <label>
-            你的补充
-            <textarea name="note" rows="4" placeholder="说不清也没关系。你只想补一句的话，可以写在这里。"></textarea>
-          </label>
-          <div class="dialogue-actions">
-            <button class="button button-secondary" type="button" data-prev>上一轮</button>
-            <button class="button button-primary" type="button" data-next>帮我整理</button>
-          </div>
-        </section>
-
-        <section class="dialogue-card" data-dialogue-card hidden>
-          <span class="dialogue-step">第 6 轮</span>
-          <div class="panel-heading">
-            <h2>我先帮你整理成今天的一小步</h2>
-            <p>你可以先保存下来。之后再回来，你会看到自己是怎么一点点复位的。</p>
-          </div>
-          <div class="result-box" id="state-result" aria-live="polite"></div>
-          <div class="dialogue-actions">
-            <button class="button button-secondary" type="button" data-prev>上一轮</button>
-            <button class="button button-primary" type="submit">保存这次状态对话</button>
-          </div>
-        </section>
-      </form>
-
-      <aside class="tool-panel result-panel" aria-live="polite">
+    <section class="positioning-report-section" aria-label="复位报告">
+      <article class="tool-panel positioning-report" id="positioning-report" hidden>
         <div class="panel-heading">
-          <h2>你的状态对话记录</h2>
-          <p>我会把这次选择留在你的浏览器里。之后你可以回来看看自己怎么变化。</p>
+          <h2>我先把你的地图整理成复位报告</h2>
+          <p>这不是给你贴标签。它只是帮你看清：今天更应该先从哪里开始。</p>
         </div>
-        <div class="saved-list" id="state-list"></div>
-      </aside>
+        <div class="result-box order-map" id="state-result"></div>
+        <label>
+          可选补充
+          <textarea id="positioning-note" rows="3" placeholder="如果你想补一句现在最真实的感受，可以写在这里；说不清也可以留空。"></textarea>
+        </label>
+        <div class="dialogue-actions">
+          <button class="button button-primary" type="button" id="save-positioning">保存并查看复位路径</button>
+          <button class="button button-secondary" type="button" id="keep-positioning">我再选几个碎片</button>
+        </div>
+      </article>
     </section>
+
+    <script is:inline type="application/json" id="order-dimensions-data" set:html={JSON.stringify(orderDimensions)}></script>
+    <script is:inline type="application/json" id="positioning-entrances-data" set:html={JSON.stringify(positioningEntrances)}></script>
   </main>
-  <SiteFooter />
 </SiteLayout>
 
-<script is:inline>
+<script>
+  // @ts-nocheck
+  import * as THREE from "three";
+
   const storageKey = "resetlife:user-states";
   const pathKey = "resetlife:latest-path";
-  const form = document.querySelector("#state-form");
-  const result = document.querySelector("#state-result");
-  const list = document.querySelector("#state-list");
-  const cards = Array.from(document.querySelectorAll("[data-dialogue-card]"));
-  const dots = Array.from(document.querySelectorAll("[data-progress-dot]"));
-  let currentStep = 0;
+  const dimensions = JSON.parse(document.querySelector("#order-dimensions-data")?.textContent || "[]");
+  const entrances = JSON.parse(document.querySelector("#positioning-entrances-data")?.textContent || "[]");
+
+  const canvas = document.querySelector("#order-map-canvas");
+  const stage = document.querySelector(".positioning-stage");
+  const fragmentCloud = document.querySelector("#fragment-cloud");
+  const dialogue = document.querySelector("#fragment-dialogue");
+  const fragmentTitle = document.querySelector("#fragment-title");
+  const fragmentDomain = document.querySelector("#fragment-domain");
+  const guideTitle = document.querySelector("#guide-title");
+  const guideCopy = document.querySelector("#guide-copy");
+  const selectedCount = document.querySelector("#selected-count");
+  const reportPanel = document.querySelector("#positioning-report");
+  const resultBox = document.querySelector("#state-result");
+  const selectedOrderBanner = document.querySelector("#selected-order-banner");
+  const selectedOrderTitle = document.querySelector("#selected-order-title");
+  const selectedOrderCopy = document.querySelector("#selected-order-copy");
+
+  const state = {
+    initialEntry: null,
+    activeDimensionId: null,
+    activeFragment: null,
+    selected: [],
+    scores: Object.fromEntries(dimensions.map((dimension) => [dimension.id, 0])),
+  };
+  let sceneController = null;
+  let fragmentAnchors = [];
+  let latestOrbitRotation = { x: 0, y: 0, z: 0 };
+  let latestOrbitZoom = 1;
+
+  const dimensionMeta = {
+    psychology: { color: 0xd87563, position: [0, 0.08, 0], label: "心理秩序" },
+    cognition: { color: 0x4d89c7, position: [0, 0.08, 0], label: "认知秩序" },
+    action: { color: 0x45a878, position: [0, 0.08, 0], label: "行动秩序" },
+  };
+
+  const fragments = dimensions.flatMap((dimension) =>
+    dimension.states.map((text, index) => ({
+      id: `${dimension.id}-${index}`,
+      text,
+      dimensionId: dimension.id,
+      dimensionTitle: dimension.title,
+      repairTitle: dimension.repairTitle,
+      shortTitle: dimension.shortTitle,
+    })),
+  );
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (char) => ({
@@ -185,153 +206,669 @@ import { disorderStates, lifeAreas, resetStages } from "@/data/site";
     localStorage.setItem(storageKey, JSON.stringify(items.slice(0, 20)));
   }
 
-  function getDiagnosisDraft() {
-    const data = new FormData(form);
-    const selected = Array.from(form.querySelectorAll('input[name="state"]:checked'));
-    const customState = String(data.get("customState") || "").trim();
-    const states = [...selected.map((input) => input.value), customState].filter(Boolean);
+  function stableNoise(index, salt = 0) {
+    const value = Math.sin((index + 1) * 12.9898 + salt * 78.233) * 43758.5453;
+    return value - Math.floor(value);
+  }
+
+  function closeFragmentDialogue() {
+    state.activeFragment = null;
+    document.querySelectorAll(".floating-fragment").forEach((item) => item.classList.remove("is-active"));
+    dialogue.hidden = true;
+  }
+
+  function projectFragmentPoint(anchor, rotation) {
+    const cosY = Math.cos(rotation.y);
+    const sinY = Math.sin(rotation.y);
+    const cosX = Math.cos(rotation.x);
+    const sinX = Math.sin(rotation.x);
+    const cosZ = Math.cos(rotation.z);
+    const sinZ = Math.sin(rotation.z);
+
+    const yRotatedX = anchor.x * cosY + anchor.z * sinY;
+    const yRotatedZ = -anchor.x * sinY + anchor.z * cosY;
+    const xRotatedY = anchor.y * cosX - yRotatedZ * sinX;
+    const xRotatedZ = anchor.y * sinX + yRotatedZ * cosX;
+
     return {
-      states,
-      suggestion:
-        selected[0]?.dataset.suggestion ||
-        "你已经把自己的状态说出来了。今天先从一个最小动作开始，不急着解释全部原因。",
-      lifeArea: String(data.get("customLifeArea") || data.get("lifeArea") || "暂未选择").trim(),
-      stage: String(data.get("customStage") || data.get("stage") || "看见自己").trim(),
-      note: String(data.get("note") || "").trim(),
+      x: yRotatedX * cosZ - xRotatedY * sinZ,
+      y: yRotatedX * sinZ + xRotatedY * cosZ,
+      z: xRotatedZ,
     };
   }
 
-  function getRecommendedDirection(draft) {
-    const joined = `${draft.states.join(" ")} ${draft.lifeArea} ${draft.stage}`;
-    if (/行动力崩塌|长期拖延|身体|生活秩序|重新行动/.test(joined)) {
+  function syncFragmentOrbit(rotation = latestOrbitRotation) {
+    latestOrbitRotation = { x: rotation.x, y: rotation.y, z: rotation.z };
+    fragmentCloud?.style.setProperty("--planet-zoom", latestOrbitZoom.toFixed(3));
+    fragmentAnchors.forEach((anchor) => {
+      if (!anchor.element) return;
+      const point = projectFragmentPoint(anchor, latestOrbitRotation);
+      const depth = Math.max(-240, Math.min(240, point.z));
+      const projectedX = point.x * latestOrbitZoom;
+      const projectedY = point.y * latestOrbitZoom;
+      const scale = (0.9 + ((depth + 240) / 480) * 0.18) * Math.sqrt(latestOrbitZoom);
+      const opacity = 0.78 + ((depth + 240) / 480) * 0.22;
+      const distanceFromCenter = Math.hypot(projectedX, projectedY);
+      const behindRatio = Math.max(0, Math.min(1, (-point.z - 16) / 130));
+      const coverRatio = Math.max(0, Math.min(1, (188 * latestOrbitZoom - distanceFromCenter) / (86 * latestOrbitZoom)));
+      const occlusion = behindRatio * coverRatio;
+      const visibility = 1 - occlusion * 0.92;
+      anchor.element.style.setProperty("--fragment-x", `${projectedX.toFixed(1)}px`);
+      anchor.element.style.setProperty("--fragment-y", `${projectedY.toFixed(1)}px`);
+      anchor.element.style.setProperty("--fragment-scale", scale.toFixed(3));
+      anchor.element.style.setProperty("--fragment-opacity", opacity.toFixed(3));
+      anchor.element.style.setProperty("--fragment-visibility", visibility.toFixed(3));
+      anchor.element.style.setProperty("--fragment-blur", `${(occlusion * 2.4).toFixed(2)}px`);
+      anchor.element.style.setProperty("--fragment-z", String(Math.round(20 + ((depth + 240) / 480) * 40)));
+      anchor.element.classList.toggle("is-behind-planet", point.z < -16);
+      anchor.element.classList.toggle("is-occluded-by-planet", occlusion > 0.45);
+    });
+  }
+
+  function createScene() {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
+    renderer.setClearColor(0x111a2a, 0.28);
+    const group = new THREE.Group();
+    const spheres = new Map();
+    let activeDimensionId = null;
+    const baseTiltZ = -0.06;
+    const baseCameraZ = 6.45;
+    const minZoom = 0.72;
+    const maxZoom = 1.42;
+    let targetRotationX = 0;
+    let targetRotationY = 0;
+    let currentZoom = 1;
+    let targetZoom = 1;
+    let isDraggingOrder = false;
+    let lastPointerX = 0;
+    let lastPointerY = 0;
+
+    scene.add(group);
+    camera.position.set(0, 0, baseCameraZ);
+    group.position.y = 0;
+    group.rotation.z = baseTiltZ;
+    latestOrbitRotation = { x: group.rotation.x, y: group.rotation.y, z: group.rotation.z };
+    scene.add(new THREE.AmbientLight(0xffffff, 0.95));
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.3);
+    keyLight.position.set(4, 5, 6);
+    scene.add(keyLight);
+
+    const backLight = new THREE.PointLight(0x9fd6ff, 1.8, 18);
+    backLight.position.set(-3, 1.5, 3);
+    scene.add(backLight);
+
+    dimensions.forEach((dimension) => {
+      const meta = dimensionMeta[dimension.id];
+      const sphere = new THREE.Mesh(
+        new THREE.SphereGeometry(0.72, 64, 64),
+        new THREE.MeshStandardMaterial({
+          color: meta.color,
+          roughness: 0.58,
+          metalness: 0.02,
+          emissive: meta.color,
+          emissiveIntensity: 0.04,
+          transparent: true,
+          opacity: 0.66,
+        }),
+      );
+      sphere.position.set(...meta.position);
+      sphere.scale.setScalar(0.01);
+      sphere.material.opacity = 0;
+      sphere.userData.targetScale = 0;
+      group.add(sphere);
+
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(1.05, 0.008, 12, 112),
+        new THREE.MeshBasicMaterial({ color: meta.color, transparent: true, opacity: 0.2 }),
+      );
+      ring.position.copy(sphere.position);
+      ring.rotation.x = Math.PI / 2.7;
+      ring.scale.setScalar(0.01);
+      ring.material.opacity = 0;
+      group.add(ring);
+
+      const orbit = new THREE.Mesh(
+        new THREE.TorusGeometry(1.36, 0.005, 8, 112),
+        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.08 }),
+      );
+      orbit.position.copy(sphere.position);
+      orbit.rotation.x = Math.PI / 2.1;
+      orbit.rotation.y = Math.PI / 8;
+      orbit.scale.setScalar(0.01);
+      orbit.material.opacity = 0;
+      group.add(orbit);
+
+      spheres.set(dimension.id, { sphere, ring, orbit });
+    });
+
+    const particleGeometry = new THREE.BufferGeometry();
+    const particleCount = 170;
+    const positions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i += 1) {
+      positions[i * 3] = (Math.random() - 0.5) * 9;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 4.6;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+    }
+    particleGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const particles = new THREE.Points(
+      particleGeometry,
+      new THREE.PointsMaterial({ color: 0xffffff, size: 0.025, transparent: true, opacity: 0.5 }),
+    );
+    group.add(particles);
+
+    sceneController = {
+      setActiveDimension(nextDimensionId) {
+        if (activeDimensionId !== nextDimensionId) {
+          targetRotationX = 0;
+          targetRotationY = 0;
+          currentZoom = 1;
+          targetZoom = 1;
+          latestOrbitZoom = 1;
+          camera.position.z = baseCameraZ;
+          fragmentCloud?.style.setProperty("--planet-zoom", "1");
+        }
+        activeDimensionId = nextDimensionId;
+        spheres.forEach(({ sphere, ring, orbit }, id) => {
+          const isActive = id === nextDimensionId;
+          sphere.userData.targetScale = isActive ? 1 : 0;
+          sphere.userData.targetOpacity = isActive ? 0.7 : 0;
+          ring.userData.targetScale = isActive ? 1 : 0;
+          ring.userData.targetOpacity = isActive ? 0.28 : 0;
+          orbit.userData.targetScale = isActive ? 1 : 0;
+          orbit.userData.targetOpacity = isActive ? 0.12 : 0;
+        });
+      },
+      reset() {
+        activeDimensionId = null;
+        targetRotationX = 0;
+        targetRotationY = 0;
+        currentZoom = 1;
+        targetZoom = 1;
+        latestOrbitZoom = 1;
+        camera.position.z = baseCameraZ;
+        fragmentCloud?.style.setProperty("--planet-zoom", "1");
+        this.setActiveDimension(null);
+      },
+    };
+
+    function isInteractiveTarget(target) {
+      return target instanceof HTMLElement && Boolean(target.closest("button, a, input, select, textarea, label"));
+    }
+
+    function startOrderDrag(event) {
+      if (!activeDimensionId || event.button !== 0 || isInteractiveTarget(event.target)) return;
+      isDraggingOrder = true;
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      targetRotationX = group.rotation.x;
+      targetRotationY = group.rotation.y;
+      stage?.classList.add("is-dragging-order");
+      closeFragmentDialogue();
+      try {
+        stage?.setPointerCapture?.(event.pointerId);
+      } catch {
+        // Some browsers only allow capture on the original pointer target.
+      }
+      event.preventDefault();
+    }
+
+    function dragOrder(event) {
+      if (!isDraggingOrder) return;
+      const dx = event.clientX - lastPointerX;
+      const dy = event.clientY - lastPointerY;
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      targetRotationY += dx * 0.0075;
+      targetRotationX = Math.max(-0.82, Math.min(0.82, targetRotationX + dy * 0.005));
+      event.preventDefault();
+    }
+
+    function stopOrderDrag(event) {
+      if (!isDraggingOrder) return;
+      isDraggingOrder = false;
+      stage?.classList.remove("is-dragging-order");
+      try {
+        stage?.releasePointerCapture?.(event.pointerId);
+      } catch {
+        // Pointer capture may already be released when the pointer leaves the stage.
+      }
+    }
+
+    function shouldIgnoreZoomTarget(target) {
+      return target instanceof HTMLElement && Boolean(target.closest(".map-panel, .selected-order-banner, .fragment-dialogue, input, select, textarea, label"));
+    }
+
+    function zoomOrder(event) {
+      if (!activeDimensionId || shouldIgnoreZoomTarget(event.target)) return;
+      const delta = -event.deltaY * 0.00125;
+      targetZoom = Math.max(minZoom, Math.min(maxZoom, targetZoom + delta));
+      event.preventDefault();
+    }
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const width = Math.max(320, rect.width);
+      const height = Math.max(420, rect.height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    }
+
+    function animate() {
+      const time = performance.now() * 0.001;
+      group.rotation.x += (targetRotationX - group.rotation.x) * 0.06;
+      group.rotation.y += (targetRotationY - group.rotation.y) * 0.06;
+      group.rotation.z += (baseTiltZ - group.rotation.z) * 0.04;
+      currentZoom += (targetZoom - currentZoom) * 0.12;
+      latestOrbitZoom = currentZoom;
+      camera.position.z += (baseCameraZ / currentZoom - camera.position.z) * 0.12;
+      syncFragmentOrbit({ x: group.rotation.x, y: group.rotation.y, z: group.rotation.z });
+      particles.rotation.y += 0.0007;
+
+      spheres.forEach(({ sphere, ring, orbit }, id) => {
+        const percent = getScorePercent(id) / 100;
+        const targetScale = (sphere.userData.targetScale || 0) * (1 + percent * 0.2);
+        sphere.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
+        const ringScale = ring.userData.targetScale || 0;
+        ring.scale.lerp(new THREE.Vector3(ringScale, ringScale, ringScale), 0.08);
+        const orbitScale = orbit.userData.targetScale || 0;
+        orbit.scale.lerp(new THREE.Vector3(orbitScale, orbitScale, orbitScale), 0.08);
+        sphere.material.opacity += ((sphere.userData.targetOpacity || 0) - sphere.material.opacity) * 0.1;
+        ring.material.opacity += ((ring.userData.targetOpacity || 0) - ring.material.opacity) * 0.1;
+        orbit.material.opacity += ((orbit.userData.targetOpacity || 0) - orbit.material.opacity) * 0.1;
+        sphere.material.emissiveIntensity = 0.04 + percent * 0.22;
+        sphere.rotation.y += activeDimensionId === id ? 0.004 + percent * 0.005 : 0.001;
+        sphere.rotation.x = Math.sin(time * 0.38) * 0.08;
+        ring.rotation.z += 0.004 + percent * 0.004;
+        orbit.rotation.z -= 0.002;
+      });
+
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener("resize", resize);
+    stage?.addEventListener("pointerdown", startOrderDrag);
+    stage?.addEventListener("pointermove", dragOrder);
+    stage?.addEventListener("pointerup", stopOrderDrag);
+    stage?.addEventListener("pointercancel", stopOrderDrag);
+    stage?.addEventListener("pointerleave", stopOrderDrag);
+    stage?.addEventListener("wheel", zoomOrder, { passive: false });
+    resize();
+    animate();
+  }
+
+  function getScorePercent(dimensionId) {
+    const dimension = dimensions.find((item) => item.id === dimensionId);
+    const maxScore = Math.max(1, dimension.states.length * 3);
+    return Math.min(100, Math.round(((state.scores[dimensionId] || 0) / maxScore) * 100));
+  }
+
+  function getDimensionScoreList() {
+    return dimensions.map((dimension) => ({
+      id: dimension.id,
+      title: dimension.title,
+      shortTitle: dimension.shortTitle,
+      href: dimension.href,
+      repairTitle: dimension.repairTitle,
+      resultTitle: dimension.resultTitle,
+      mechanism: dimension.mechanism,
+      advice: dimension.advice,
+      score: state.scores[dimension.id] || 0,
+      maxScore: dimension.states.length * 3,
+      percent: getScorePercent(dimension.id),
+      selectedStates: state.selected
+        .filter((item) => item.dimensionId === dimension.id)
+        .map((item) => ({ state: item.text, intensity: item.intensity })),
+    }));
+  }
+
+  function getConclusion(scores) {
+    const sorted = [...scores].sort((a, b) => b.percent - a.percent);
+    const [top, second, third] = sorted;
+    const highCount = scores.filter((item) => item.percent >= 60).length;
+    const totalScore = scores.reduce((sum, item) => sum + item.score, 0);
+
+    if (totalScore === 0) {
       return {
-        title: "行为重构",
-        href: "/action/",
-        reason: "你现在最需要的是先恢复一点行动秩序。我们不从大目标开始，只从一个能完成的小动作开始。",
+        type: "暂时还看不清主导方向",
+        title: "你的秩序结构还需要再多一点信息",
+        dimensions: [],
+        repairTitle: "继续自我定位",
+        href: "/state/",
+        mechanism: "你还没有把明显的状态碎片放进地图。我们可以先不急着下结论，再点几个最像你的碎片。",
+        advice: "先选三到五个最像你的碎片就够了，不需要把全部状态都整理完。",
       };
     }
-    if (/认知混乱|目标丧失|学习|事业|金钱|理解世界/.test(joined)) {
+
+    if (highCount === 3) {
       return {
-        title: "认知重塑",
-        href: "/cognition/",
-        reason: "你现在更需要先把问题看清楚。我们先抓住一个困惑，再用一个概念帮你整理它。",
+        type: "三系统混乱型",
+        title: "你的当前状态：人生秩序整体失衡",
+        dimensions: scores,
+        repairTitle: "综合复位路径",
+        href: "/path/#directions",
+        mechanism: "心理、认知和行动都被明显影响时，不适合马上给自己安排复杂任务。我们先做最小复位，让系统先恢复一点稳定。",
+        advice: "今天只做三件小事：暂停过度自责，选出最消耗你的压力源，再设计一个小到不会失败的行动。",
       };
     }
+
+    if (top.percent - second.percent <= 10 && second.percent >= 35) {
+      return {
+        type: "双重混合型",
+        title: `你的主要混乱源：${top.title} + ${second.title}`,
+        dimensions: [top, second],
+        repairTitle: top.repairTitle,
+        href: top.href,
+        mechanism: `现在最明显的是${top.title}和${second.title}一起影响你。我们先从更高的一项开始，不需要同时处理两条线。`,
+        advice: top.advice,
+      };
+    }
+
     return {
-      title: "心理重建",
-      href: "/psychology/",
-      reason: "你现在更需要先被自己接住。我们先看见情绪、触发和自动想法，不急着马上改变。",
+      type: "单一主导型",
+      title: `你的主要混乱源：${top.resultTitle}`,
+      dimensions: [top],
+      repairTitle: top.repairTitle,
+      href: top.href,
+      mechanism: top.mechanism,
+      advice: top.advice,
+      comparison: third ? `${top.shortTitle} ${top.percent}% · ${second.shortTitle} ${second.percent}% · ${third.shortTitle} ${third.percent}%` : "",
     };
   }
 
-  function renderList() {
-    const items = readItems();
-    if (!items.length) {
-      list.innerHTML = '<p class="empty-note">还没有保存的状态对话记录。</p>';
+  function renderFragments() {
+    if (!state.activeDimensionId) {
+      fragmentCloud.innerHTML = "";
+      fragmentAnchors = [];
       return;
     }
-    list.innerHTML = items
+    const activeFragments = fragments.filter((fragment) => fragment.dimensionId === state.activeDimensionId);
+    const count = Math.max(1, activeFragments.length);
+    fragmentAnchors = activeFragments.map((fragment, index) => {
+      const baseAngle = -Math.PI / 2 + (Math.PI * 2 * index) / count;
+      const angle = baseAngle + (stableNoise(index, 1) - 0.5) * 0.14;
+      const radius = 318 + (stableNoise(index, 2) - 0.5) * 28;
+      return {
+        fragmentId: fragment.id,
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius * 0.36 + (stableNoise(index, 3) - 0.5) * 12,
+        z: Math.sin(angle) * radius * 0.42 + (stableNoise(index, 4) - 0.5) * 42,
+        element: null,
+      };
+    });
+    fragmentCloud.innerHTML = activeFragments
+      .map((fragment, index) => {
+        return `
+          <button class="floating-fragment floating-fragment-${escapeHtml(fragment.dimensionId)}" type="button" data-fragment-id="${escapeHtml(fragment.id)}">
+            ${escapeHtml(fragment.text)}
+          </button>
+        `;
+      })
+      .join("");
+    fragmentAnchors.forEach((anchor) => {
+      anchor.element = fragmentCloud.querySelector(`[data-fragment-id="${CSS.escape(anchor.fragmentId)}"]`);
+    });
+    syncFragmentOrbit();
+  }
+
+  function updateSelectedOrderBanner() {
+    if (!selectedOrderBanner) return;
+    if (!state.activeDimensionId || !state.initialEntry) {
+      selectedOrderBanner.hidden = true;
+      return;
+    }
+    const dimension = dimensions.find((item) => item.id === state.activeDimensionId);
+    selectedOrderTitle.textContent = dimension?.title || state.initialEntry.direction || "当前秩序";
+    selectedOrderCopy.textContent = "按住左键拖动旋转，滚动鼠标滚轮可以拉近或拉远。";
+    selectedOrderBanner.hidden = false;
+  }
+
+  function updateGuide() {
+    selectedCount.textContent = `${state.selected.length} 个碎片已归位`;
+    if (!state.initialEntry) {
+      stage?.classList.remove("has-started");
+      stage?.removeAttribute("data-active-dimension");
+      updateSelectedOrderBanner();
+      guideTitle.textContent = "先选一个起点";
+      guideCopy.textContent = "选完起点后，再点地图上的状态碎片。";
+      return;
+    }
+    stage?.classList.add("has-started");
+    stage?.setAttribute("data-active-dimension", state.activeDimensionId || "");
+    updateSelectedOrderBanner();
+    guideTitle.textContent = state.selected.length ? "继续点最像你的碎片" : "现在点一个状态碎片";
+    guideCopy.textContent = state.selected.length >= 5 ? "已经足够生成报告了。你也可以再选几个。" : "不用全部点完，先选三到五个最像你的。";
+  }
+
+  function resetEntrySelection() {
+    state.initialEntry = null;
+    state.activeDimensionId = null;
+    state.activeFragment = null;
+    state.selected = [];
+    state.scores = Object.fromEntries(dimensions.map((dimension) => [dimension.id, 0]));
+    sceneController?.reset();
+    fragmentCloud.innerHTML = "";
+    fragmentAnchors = [];
+    dialogue.hidden = true;
+    reportPanel.hidden = true;
+    document.querySelectorAll(".entry-button").forEach((item) => item.classList.remove("is-selected"));
+    document.querySelectorAll(".floating-fragment").forEach((item) => item.classList.remove("is-active", "is-collected"));
+    document.querySelector(".map-panel-start")?.classList.remove("is-compact");
+    updateGuide();
+  }
+
+  function placeDialogue(anchor) {
+    if (!(anchor instanceof HTMLElement)) return;
+    const anchorRect = anchor.getBoundingClientRect();
+    const width = Math.min(460, window.innerWidth - 32);
+    const estimatedHeight = 250;
+    let left = anchorRect.right + 14;
+    let top = anchorRect.top - 12;
+
+    if (left + width > window.innerWidth - 16) {
+      left = anchorRect.left - width - 14;
+    }
+
+    if (left < 16) {
+      left = Math.min(window.innerWidth - width - 16, anchorRect.left);
+    }
+
+    if (top < 82) {
+      top = 82;
+    }
+
+    if (top + estimatedHeight > window.innerHeight - 16) {
+      top = Math.max(16, window.innerHeight - estimatedHeight - 16);
+    }
+
+    dialogue.style.setProperty("--dialogue-left", `${Math.round(left)}px`);
+    dialogue.style.setProperty("--dialogue-top", `${Math.round(top)}px`);
+    dialogue.style.setProperty("--dialogue-width", `${Math.round(width)}px`);
+  }
+
+  function openFragment(fragment, anchor) {
+    state.activeFragment = fragment;
+    document.querySelectorAll(".floating-fragment").forEach((item) => item.classList.remove("is-active"));
+    anchor?.classList.add("is-active");
+    fragmentTitle.textContent = fragment.text;
+    fragmentDomain.textContent = fragment.dimensionTitle;
+    placeDialogue(anchor);
+    dialogue.hidden = false;
+  }
+
+  function chooseIntensity(intensity) {
+    if (!state.activeFragment) return;
+    const fragment = state.activeFragment;
+    if (!state.selected.some((item) => item.id === fragment.id)) {
+      state.selected.push({ ...fragment, intensity });
+      state.scores[fragment.dimensionId] = (state.scores[fragment.dimensionId] || 0) + intensity;
+      document.querySelector(`[data-fragment-id="${CSS.escape(fragment.id)}"]`)?.classList.add("is-collected");
+    }
+    state.activeFragment = null;
+    document.querySelectorAll(".floating-fragment").forEach((item) => item.classList.remove("is-active"));
+    dialogue.hidden = true;
+    updateGuide();
+  }
+
+  function renderBars(scores) {
+    return scores
       .map(
         (item) => `
-          <article class="saved-item">
-            <span>${escapeHtml(item.date)}</span>
-            <strong>${escapeHtml(item.states.join(" / "))}</strong>
-            <p>${escapeHtml(item.suggestion)}</p>
-          </article>
+          <div class="order-bar">
+            <span>${escapeHtml(item.title)}</span>
+            <strong>${escapeHtml(item.percent)}%</strong>
+            <i style="--value: ${escapeHtml(item.percent)}%"></i>
+          </div>
         `,
       )
       .join("");
   }
 
-  function renderResult() {
-    const draft = getDiagnosisDraft();
-    const direction = getRecommendedDirection(draft);
-    result.innerHTML = `
-      <strong>${escapeHtml(draft.states.join(" / "))}</strong>
-      <p>${escapeHtml(draft.suggestion)}</p>
-      <p>现在最受影响的是：${escapeHtml(draft.lifeArea)}</p>
-      <p>我们先按这个阶段来走：${escapeHtml(draft.stage)}</p>
-      <p>今天建议先进入：${escapeHtml(direction.title)}</p>
-      ${draft.note ? `<p>你补充说：${escapeHtml(draft.note)}</p>` : ""}
+  function renderSelectedStates(scores) {
+    const selected = scores.flatMap((item) =>
+      item.selectedStates.slice(0, 4).map((selectedState) => `${item.shortTitle}：${selectedState.state}`),
+    );
+    if (!selected.length) return "<p>你还没有选择明显状态，我们可以再点几个碎片。</p>";
+    return `<p>你放进地图的状态碎片：${selected.map(escapeHtml).join(" / ")}</p>`;
+  }
+
+  function buildDraft() {
+    const scores = getDimensionScoreList();
+    const conclusion = getConclusion(scores);
+    const note = String(document.querySelector("#positioning-note")?.value || "").trim();
+    return {
+      initialEntry: state.initialEntry || { value: "custom", label: "暂未选择", direction: "你自己的描述" },
+      scores,
+      conclusion,
+      note,
+      date: new Date().toLocaleString("zh-CN", { hour12: false }),
+    };
+  }
+
+  function renderReport() {
+    const draft = buildDraft();
+    resultBox.innerHTML = `
+      <strong>${escapeHtml(draft.conclusion.title)}</strong>
+      <div class="order-bars">${renderBars(draft.scores)}</div>
+      <p>一开始你更像：${escapeHtml(draft.initialEntry.label || "暂未选择")}</p>
+      ${renderSelectedStates(draft.scores)}
+      <p>${escapeHtml(draft.conclusion.mechanism)}</p>
+      <p>${escapeHtml(draft.conclusion.advice)}</p>
+      <p>下一步建议：${escapeHtml(draft.conclusion.repairTitle)}</p>
     `;
+    reportPanel.hidden = false;
+    reportPanel.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
-  function setStep(nextStep) {
-    currentStep = Math.max(0, Math.min(nextStep, cards.length - 1));
-    cards.forEach((card, index) => {
-      const active = index === currentStep;
-      card.hidden = !active;
-      card.classList.toggle("is-active", active);
+  function addCustomFragment() {
+    const textInput = document.querySelector("#custom-fragment-text");
+    const dimensionSelect = document.querySelector("#custom-fragment-dimension");
+    const intensitySelect = document.querySelector("#custom-fragment-intensity");
+    const text = String(textInput?.value || "").trim();
+    if (!text) return;
+    const dimension = dimensions.find((item) => item.id === dimensionSelect?.value) || dimensions[0];
+    const intensity = Number(intensitySelect?.value || 1);
+    state.selected.push({
+      id: `custom-${Date.now()}`,
+      text,
+      dimensionId: dimension.id,
+      dimensionTitle: dimension.title,
+      repairTitle: dimension.repairTitle,
+      shortTitle: dimension.shortTitle,
+      intensity,
     });
-    dots.forEach((dot, index) => {
-      dot.classList.toggle("is-active", index === currentStep);
-      dot.classList.toggle("is-complete", index < currentStep);
-    });
-    if (currentStep === cards.length - 1) renderResult();
+    state.scores[dimension.id] = (state.scores[dimension.id] || 0) + intensity;
+    textInput.value = "";
+    updateGuide();
   }
 
-  function showStepError(message) {
-    const error = cards[currentStep].querySelector("[data-step-error]");
-    if (error) error.textContent = message;
+  function saveAndContinue() {
+    const draft = buildDraft();
+    writeItems([draft, ...readItems()]);
+    localStorage.setItem(
+      pathKey,
+      JSON.stringify({
+        ...draft,
+        direction: {
+          title: draft.conclusion.repairTitle,
+          href: draft.conclusion.href,
+          reason: draft.conclusion.advice,
+        },
+        states: draft.scores.flatMap((item) => item.selectedStates.map((selectedState) => selectedState.state)),
+        lifeArea: draft.conclusion.title,
+        stage: "自我定位完成",
+      }),
+    );
+    window.location.href = "/path/";
   }
 
-  function clearStepError() {
-    const error = cards[currentStep].querySelector("[data-step-error]");
-    if (error) error.textContent = "";
-  }
+  document.querySelector("#entry-stack")?.addEventListener("click", (event) => {
+    const button = event.target instanceof HTMLElement ? event.target.closest("[data-entry]") : null;
+    if (!button) return;
+    const entry = entrances.find((item) => item.value === button.getAttribute("data-entry"));
+    state.initialEntry = entry;
+    state.activeDimensionId = entry?.value || null;
+    sceneController?.setActiveDimension(state.activeDimensionId);
+    document.querySelectorAll(".entry-button").forEach((item) => item.classList.toggle("is-selected", item === button));
+    document.querySelector(".map-panel-start")?.classList.add("is-compact");
+    renderFragments();
+    updateGuide();
+  });
 
-  function canLeaveCurrentStep() {
-    const draft = getDiagnosisDraft();
-    if (currentStep === 1 && !draft.states.length) {
-      showStepError("先选一个最像你现在的状态，或者写一句自己的状态，我们再继续。");
-      return false;
-    }
-    clearStepError();
-    return true;
-  }
+  document.querySelector("#custom-entry")?.addEventListener("input", (event) => {
+    const value = event.target instanceof HTMLInputElement ? event.target.value.trim() : "";
+    if (!value) return;
+    state.initialEntry = { value: "custom", label: value, direction: "你自己的描述" };
+    state.activeDimensionId = state.activeDimensionId || "cognition";
+    sceneController?.setActiveDimension(state.activeDimensionId);
+    document.querySelectorAll(".entry-button").forEach((item) => item.classList.remove("is-selected"));
+    document.querySelector(".map-panel-start")?.classList.add("is-compact");
+    renderFragments();
+    updateGuide();
+  });
 
-  function selectFromQuery() {
-    const selectedState = new URLSearchParams(window.location.search).get("state");
-    if (!selectedState) return;
-    const input = form.querySelector(`input[value="${CSS.escape(selectedState)}"]`);
-    if (input) input.checked = true;
-  }
+  fragmentCloud.addEventListener("click", (event) => {
+    const button = event.target instanceof HTMLElement ? event.target.closest("[data-fragment-id]") : null;
+    if (!button || button.classList.contains("is-collected")) return;
+    const fragment = fragments.find((item) => item.id === button.getAttribute("data-fragment-id"));
+    if (fragment) openFragment(fragment, button);
+  });
 
-  form.addEventListener("click", (event) => {
+  dialogue.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
-    if (target.matches("[data-next]")) {
-      if (!canLeaveCurrentStep()) return;
-      setStep(currentStep + 1);
-    }
-    if (target.matches("[data-prev]")) {
-      clearStepError();
-      setStep(currentStep - 1);
-    }
+    const intensity = target.getAttribute("data-intensity");
+    if (intensity) chooseIntensity(Number(intensity));
   });
 
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const draft = getDiagnosisDraft();
-    if (!draft.states.length) {
-      setStep(1);
-      showStepError("先选一个最像你现在的状态，或者写一句自己的状态，我们再继续。");
-      return;
-    }
-    const item = {
-      date: new Date().toLocaleString("zh-CN", { hour12: false }),
-      ...draft,
-    };
-    const direction = getRecommendedDirection(draft);
-    writeItems([item, ...readItems()]);
-    localStorage.setItem(pathKey, JSON.stringify({ ...item, direction }));
-    renderList();
-    result.innerHTML += '<p class="record-message">已经保存。我们现在去看你的复位路径。</p>';
-    window.location.href = "/path/";
+  document.querySelector("#skip-fragment")?.addEventListener("click", () => {
+    state.activeFragment = null;
+    document.querySelectorAll(".floating-fragment").forEach((item) => item.classList.remove("is-active"));
+    dialogue.hidden = true;
+  });
+  document.querySelector("#reset-entry")?.addEventListener("click", resetEntrySelection);
+  document.querySelector("#finish-positioning")?.addEventListener("click", renderReport);
+  document.querySelector("#add-custom-fragment")?.addEventListener("click", addCustomFragment);
+  document.querySelector("#save-positioning")?.addEventListener("click", saveAndContinue);
+  document.querySelector("#keep-positioning")?.addEventListener("click", () => {
+    reportPanel.hidden = true;
+    document.querySelector(".positioning-stage")?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
+  function selectFromQuery() {
+    const selectedEntry = new URLSearchParams(window.location.search).get("entry");
+    if (!selectedEntry) return;
+    const button = document.querySelector(`[data-entry="${CSS.escape(selectedEntry)}"]`);
+    if (button instanceof HTMLButtonElement) button.click();
+  }
+
+  createScene();
+  renderFragments();
   selectFromQuery();
-  renderList();
-  setStep(0);
+  updateGuide();
 </script>
-

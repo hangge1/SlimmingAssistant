@@ -2,46 +2,50 @@
 import SiteFooter from "@/components/SiteFooter.astro";
 import SiteHeader from "@/components/SiteHeader.astro";
 import SiteLayout from "@/layouts/SiteLayout.astro";
-import { disorderStates, resetFlow, resetSystems } from "@/data/site";
+import { positioningEntrances, resetFlow, resetSystems } from "@/data/site";
 ---
 
 <SiteLayout title="复位 | 重建人生系统" description="当你感到失序时，复位会陪你一步步重新看见自己、理解问题并开始行动。">
   <SiteHeader />
   <main>
-    <section class="reset-hero">
-      <div class="reset-hero-grid">
-        <div class="reset-hero-copy">
-          <p class="eyebrow">我们先把生活重新接上</p>
-          <h1>复位</h1>
-          <p class="hero-subtitle">重建人生系统</p>
-          <p class="hero-copy">
-            如果你现在觉得自己乱了、卡住了、动不起来，我们先不谈大道理。我们一步步看见你自己，整理你面对的问题，再做一个小到能开始的动作。
-          </p>
-          <div class="actions">
-            <a class="button button-primary" href="/state/">开始状态识别</a>
-            <a class="button button-secondary" href="#flow">看看完整路径</a>
-          </div>
+    <section class="reset-gateway-hero" aria-labelledby="reset-gateway-title">
+      <canvas id="reset-gateway-canvas" class="reset-gateway-canvas" aria-hidden="true"></canvas>
+      <div class="reset-gateway-shade" aria-hidden="true"></div>
+      <div class="reset-gateway-torch" aria-hidden="true"></div>
+      <div class="reset-gateway-content">
+        <p class="eyebrow">Reset Life System</p>
+        <h1 id="reset-gateway-title">复位</h1>
+        <p class="reset-gateway-subtitle">重建人生系统</p>
+        <a class="reset-gateway-button" href="/state/" aria-describedby="reset-hover-prompt">
+          <span>Reset</span>
+        </a>
+        <div class="reset-hover-prompt" id="reset-hover-prompt" role="status">
+          想要复位你的人生系统吗？
         </div>
-        <div class="system-board" aria-label="复位闭环">
-          <span>状态识别</span>
-          <span>复位路径</span>
-          <span>选择修复方向</span>
-          <span>记录复位过程</span>
-          <span>看见他人的复位历程</span>
-        </div>
+        <p class="reset-gateway-copy">
+          当生活开始失序，你需要的不是更多道理，而是一套能让你重新看清自己、校准方向、恢复行动的内在系统。
+        </p>
+        <p class="reset-gateway-signature">先定位，再修复。让你的人生重新回到自己的节奏。</p>
       </div>
     </section>
 
-    <section class="section compact-section" aria-labelledby="state-title">
+    <section class="section compact-section" aria-labelledby="two-blocks-title">
       <div class="section-heading">
-        <p>Diagnosis</p>
-        <h2 id="state-title">状态识别</h2>
-        <span>你不用解释清楚为什么。先从选项里找一个最像你现在的状态。</span>
+        <p>Two Blocks</p>
+        <h2 id="two-blocks-title">复位先分成两块</h2>
+        <span>你不用一进来就知道自己该做什么。我们先定位，再修复。</span>
       </div>
-      <div class="state-grid">
-        {disorderStates.map((state) => (
-          <a class="state-chip" href={`/state/?state=${encodeURIComponent(state.label)}`}>{state.label}</a>
-        ))}
+      <div class="two-block-grid">
+        <a class="two-block-card" href="/state/">
+          <span>01</span>
+          <h3>自我定位</h3>
+          <p>我会陪你一轮一轮选择：你现在的混乱，主要是心理不稳、认知不清，还是行动断裂。</p>
+        </a>
+        <a class="two-block-card" href="/path/#directions">
+          <span>02</span>
+          <h3>自我修复</h3>
+          <p>定位完成后，我们再进入心理复位、认知复位、行动复位。一次只走一条路。</p>
+        </a>
       </div>
     </section>
 
@@ -49,7 +53,7 @@ import { disorderStates, resetFlow, resetSystems } from "@/data/site";
       <div class="section-heading">
         <p>Reset Path</p>
         <h2>我们按这个顺序来</h2>
-        <span>先识别状态，再给复位路径。心理、认知、行为，是路径里的三条修复方向。</span>
+        <span>先做自我定位，再看秩序结构图，最后进入自我修复。</span>
       </div>
       <div class="flow-grid">
         {resetFlow.map((item, index) => (
@@ -62,11 +66,27 @@ import { disorderStates, resetFlow, resetSystems } from "@/data/site";
       </div>
     </section>
 
-    <section id="directions" class="section">
+    <section class="section">
       <div class="section-heading">
-        <p>Treatment Directions</p>
-        <h2>状态识别之后，我们再进入三大修复方向</h2>
-        <span>你不用自己判断该去哪一页。状态对话结束后，我会先帮你整理一个优先方向。</span>
+        <p>Self Positioning</p>
+        <h2>你现在最接近哪一种状态？</h2>
+        <span>这不是最终结论，只是自我定位的第一步。后面我们会继续看心理、认知和行动三维秩序。</span>
+      </div>
+      <div class="state-grid entrance-grid">
+        {positioningEntrances.map((entry) => (
+          <a class="state-chip" href={`/state/?entry=${entry.value}`}>
+            <strong>{entry.label}</strong>
+            <span>{entry.direction}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section id="repair" class="section">
+      <div class="section-heading">
+        <p>Self Repair</p>
+        <h2>自我修复有三条方向</h2>
+        <span>你不用自己判断该去哪一页。自我定位结束后，我会先帮你整理一个优先方向。</span>
       </div>
       <div class="card-grid">
         {resetSystems.map((system) => (
@@ -85,10 +105,186 @@ import { disorderStates, resetFlow, resetSystems } from "@/data/site";
       <div class="section-heading">
         <p>Next</p>
         <h2>现在先不用选修复方向</h2>
-        <span>你先做一次状态识别。等我们看清楚状态，再决定今天从心理、认知，还是行为开始。</span>
+        <span>你先做一次自我定位。等我们看清楚秩序结构，再决定今天从心理、认知，还是行动开始。</span>
       </div>
-      <a class="button button-primary" href="/state/">进入状态识别</a>
+      <a class="button button-primary" href="/state/">进入自我定位</a>
     </section>
   </main>
   <SiteFooter />
 </SiteLayout>
+
+<script>
+  // @ts-nocheck
+  import * as THREE from "three";
+
+  const hero = document.querySelector(".reset-gateway-hero");
+  const canvas = document.querySelector("#reset-gateway-canvas");
+
+  if (hero) {
+    const torch = {
+      active: false,
+      currentX: hero.clientWidth / 2,
+      currentY: hero.clientHeight * 0.48,
+      targetX: hero.clientWidth / 2,
+      targetY: hero.clientHeight * 0.48,
+      trailX: hero.clientWidth / 2,
+      trailY: hero.clientHeight * 0.48,
+    };
+
+    const moveTorch = (event) => {
+      const rect = hero.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+        torch.active = false;
+        return;
+      }
+
+      torch.active = true;
+      torch.targetX = x;
+      torch.targetY = y;
+    };
+
+    const renderTorch = () => {
+      torch.currentX += (torch.targetX - torch.currentX) * 0.28;
+      torch.currentY += (torch.targetY - torch.currentY) * 0.28;
+      torch.trailX += (torch.currentX - torch.trailX) * 0.1;
+      torch.trailY += (torch.currentY - torch.trailY) * 0.1;
+
+      hero.style.setProperty("--torch-x", `${torch.currentX}px`);
+      hero.style.setProperty("--torch-y", `${torch.currentY}px`);
+      hero.style.setProperty("--torch-trail-x", `${torch.trailX}px`);
+      hero.style.setProperty("--torch-trail-y", `${torch.trailY}px`);
+      hero.classList.toggle("is-torch-active", torch.active);
+      requestAnimationFrame(renderTorch);
+    };
+
+    window.addEventListener("pointermove", moveTorch, { passive: true });
+    window.addEventListener("pointerleave", () => {
+      torch.active = false;
+    });
+    renderTorch();
+  }
+
+  if (canvas) {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 120);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
+    renderer.setClearColor(0x0d1524, 0.96);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+    camera.position.set(0, 0.2, 9.5);
+
+    scene.add(new THREE.AmbientLight(0x9fb9ff, 0.72));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    keyLight.position.set(3.6, 5, 6);
+    scene.add(keyLight);
+    const resetLight = new THREE.PointLight(0x8fd7ff, 2.8, 18);
+    resetLight.position.set(0, 0.4, 3.2);
+    scene.add(resetLight);
+
+    const group = new THREE.Group();
+    group.rotation.z = -Math.PI / 4;
+    scene.add(group);
+
+    const tunnelMaterial = new THREE.MeshStandardMaterial({
+      color: 0x2f6db3,
+      emissive: 0x2f6db3,
+      emissiveIntensity: 0.25,
+      roughness: 0.32,
+      metalness: 0.22,
+      transparent: true,
+      opacity: 0.5,
+    });
+
+    const rings = [];
+    for (let index = 0; index < 9; index += 1) {
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(1.7 + index * 0.38, 0.012 + index * 0.001, 10, 128),
+        tunnelMaterial.clone(),
+      );
+      ring.position.z = -index * 0.58;
+      ring.rotation.x = Math.PI / 2;
+      ring.rotation.z = index * 0.22;
+      ring.material.opacity = 0.48 - index * 0.03;
+      group.add(ring);
+      rings.push(ring);
+    }
+
+    const particleGeometry = new THREE.BufferGeometry();
+    const particleCount = 360;
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    for (let index = 0; index < particleCount; index += 1) {
+      positions[index * 3] = (Math.random() - 0.5) * 12;
+      positions[index * 3 + 1] = (Math.random() - 0.5) * 7;
+      positions[index * 3 + 2] = -Math.random() * 9 + 2;
+      const blue = 0.62 + Math.random() * 0.38;
+      colors[index * 3] = 0.55 + Math.random() * 0.25;
+      colors[index * 3 + 1] = 0.72 + Math.random() * 0.22;
+      colors[index * 3 + 2] = blue;
+    }
+    particleGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    particleGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    const particles = new THREE.Points(
+      particleGeometry,
+      new THREE.PointsMaterial({
+        size: 0.028,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+      }),
+    );
+    group.add(particles);
+
+    const core = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.58, 2),
+      new THREE.MeshStandardMaterial({
+        color: 0xf1c87b,
+        emissive: 0xf1c87b,
+        emissiveIntensity: 0.42,
+        roughness: 0.2,
+        metalness: 0.12,
+        transparent: true,
+        opacity: 0.92,
+      }),
+    );
+    core.position.set(0, 0, 0.2);
+    group.add(core);
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const width = Math.max(320, rect.width);
+      const height = Math.max(520, rect.height);
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    }
+
+    function animate() {
+      const time = performance.now() * 0.001;
+      group.rotation.y = Math.sin(time * 0.22) * 0.08;
+      group.rotation.z = -Math.PI / 4 + Math.sin(time * 0.18) * 0.035;
+      particles.rotation.z += 0.0008;
+      particles.rotation.y += 0.0005;
+      core.rotation.x += 0.006;
+      core.rotation.y += 0.009;
+      core.scale.setScalar(1 + Math.sin(time * 2.2) * 0.035);
+
+      rings.forEach((ring, index) => {
+        ring.rotation.z += 0.002 + index * 0.0005;
+        ring.position.z = -index * 0.58 + Math.sin(time * 0.8 + index) * 0.07;
+        ring.material.emissiveIntensity = 0.18 + Math.sin(time * 1.4 + index) * 0.08;
+      });
+
+      resetLight.intensity = 2.5 + Math.sin(time * 1.7) * 0.45;
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+    animate();
+  }
+</script>

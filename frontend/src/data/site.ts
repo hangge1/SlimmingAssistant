@@ -1,50 +1,50 @@
 export const resetSystems = [
   {
-    title: "心理重建",
+    title: "心理复位",
     href: "/psychology/",
-    role: "处理你和自己的关系",
-    question: "我们先看看你正在怎么对待自己。",
-    description: "你不用马上变好。我们先把情绪、触发和自我攻击的话看清楚，让你不再一个人硬扛。",
+    role: "先恢复稳定感",
+    question: "我们先看看你现在有没有力量面对现实。",
+    description: "你不用马上变好。我们先把情绪、压力源和自我攻击的话看清楚，让你不再一个人硬扛。",
     index: "01",
   },
   {
-    title: "认知重塑",
+    title: "认知复位",
     href: "/cognition/",
-    role: "处理你如何理解问题",
+    role: "先看清问题结构",
     question: "我们先抓住一个让你困惑的问题。",
-    description: "你不需要一下子想明白全部。先选一个问题、一个概念，再慢慢把混乱整理出来。",
+    description: "你不需要一下子想明白全部。先选一个问题、一个判断标准，再慢慢把混乱整理出来。",
     index: "02",
   },
   {
-    title: "行为重构",
+    title: "行动复位",
     href: "/action/",
-    role: "处理你如何重新行动",
+    role: "先建立最小行动",
     question: "我们先做一个小到能开始的动作。",
-    description: "你不用立刻恢复自律。先选一个今天能做的最小行动，完成一次闭环。",
+    description: "你不用立刻恢复自律。先选一个今天能做的最小行动，完成一次反馈闭环。",
     index: "03",
   },
 ];
 
 export const resetFlow = [
   {
-    title: "状态识别",
+    title: "自我定位",
     href: "/state/",
-    description: "我们先一轮一轮对话，看见你现在卡在哪里。",
+    description: "我们先用三维秩序识别，看清你现在主要乱在心理、认知，还是行动。",
   },
   {
-    title: "复位路径",
+    title: "秩序结构图",
     href: "/path/",
-    description: "我会把你的状态整理成今天优先走的修复方向。",
+    description: "我会把你的选择整理成一张结构图，不给你贴标签，只帮你看清重点。",
   },
   {
-    title: "三大修复方向",
+    title: "自我修复",
     href: "/path/#directions",
-    description: "心理重建、认知重塑、行为重构，不再是并列内容，而是路径里的三条方向。",
+    description: "看清主要错位点后，再进入心理复位、认知复位或行动复位。",
   },
   {
     title: "我的复位记录",
     href: "/records/",
-    description: "看到你每一次状态识别、修复动作和复盘记录。",
+    description: "看到你每一次自我定位、自我修复动作和复盘记录。",
   },
   {
     title: "复位社区",
@@ -56,6 +56,102 @@ export const resetFlow = [
     href: "/review/",
     description: "做完一小步后，我们再回来看看有没有好一点，是否需要调整方向。",
   },
+];
+
+export const positioningEntrances = [
+  {
+    value: "psychology",
+    label: "我知道该做什么，但就是没有力量",
+    direction: "心理秩序",
+  },
+  {
+    value: "cognition",
+    label: "我很想改变，但不知道问题到底在哪",
+    direction: "认知秩序",
+  },
+  {
+    value: "action",
+    label: "我计划很多，但总是执行不下去",
+    direction: "行动秩序",
+  },
+];
+
+export const orderDimensions = [
+  {
+    id: "psychology",
+    title: "心理秩序",
+    shortTitle: "心理",
+    question: "我是否稳定？",
+    color: "warm",
+    href: "/psychology/",
+    repairTitle: "心理复位",
+    resultTitle: "心理秩序失衡",
+    mechanism:
+      "当心理秩序失衡时，你可能不是不懂道理，而是内在能量长期处在消耗状态。这个时候强行要求自己自律，反而容易让内耗更重。",
+    advice: "你的第一步不是制定更大的目标，而是先恢复稳定感、降低内耗，再设计一个小到不会失败的行动。",
+    states: [
+      "我经常感到很累",
+      "我容易焦虑",
+      "我害怕失败",
+      "我总是否定自己",
+      "我对未来没有安全感",
+      "我经常陷入内耗",
+      "我明知道该做什么，但就是动不了",
+      "我很容易被外界评价影响",
+    ],
+  },
+  {
+    id: "cognition",
+    title: "认知秩序",
+    shortTitle: "认知",
+    question: "我是否清楚？",
+    color: "cool",
+    href: "/cognition/",
+    repairTitle: "认知复位",
+    resultTitle: "认知秩序混乱",
+    mechanism:
+      "当认知秩序混乱时，你会反复摇摆、想太多、看不清重点。你越急着行动，越可能在几个方向之间来回消耗。",
+    advice: "你的第一步是先看清问题结构，再建立判断标准，最后才设计行动路径。",
+    states: [
+      "我不知道自己真正想要什么",
+      "我分不清什么更重要",
+      "我经常想很多，但越想越乱",
+      "我容易被别人的看法带偏",
+      "我没有清晰的人生判断标准",
+      "我总是在几个选择之间反复纠结",
+      "我不知道问题的根源在哪里",
+      "我经常努力错方向",
+    ],
+  },
+  {
+    id: "action",
+    title: "行动秩序",
+    shortTitle: "行动",
+    question: "我是否持续？",
+    color: "steady",
+    href: "/action/",
+    repairTitle: "行动复位",
+    resultTitle: "行动秩序断裂",
+    mechanism:
+      "当行动秩序断裂时，你可能已经知道方向，但缺少稳定执行、反馈和调整机制。计划、热情和目标都不足以替代一个可持续的小闭环。",
+    advice: "你的第一步是减少目标数量，建立每日最小行动，再用清楚的证据和复盘把它闭环。",
+    states: [
+      "我总是拖延",
+      "我计划很多，但执行很少",
+      "我经常三分钟热度",
+      "我坚持不下来",
+      "我的作息和生活节奏很混乱",
+      "我缺少稳定的习惯系统",
+      "我很少复盘自己的行动结果",
+      "我总是开始很多事，但完成很少",
+    ],
+  },
+];
+
+export const intensityOptions = [
+  { label: "轻度", value: "1" },
+  { label: "中度", value: "2" },
+  { label: "重度", value: "3" },
 ];
 
 export const disorderStates = [
@@ -186,6 +282,6 @@ export const projects = [
     href: "/projects/slimming/",
     appHref: "/app/slimming/",
     image: "/projects/slimming-home-preview.png",
-    status: "行为重构工具",
+    status: "行动复位工具",
   },
 ];

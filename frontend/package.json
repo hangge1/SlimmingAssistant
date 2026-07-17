@@ -12,10 +12,12 @@
   "dependencies": {
     "@astrojs/vue": "^5.1.4",
     "astro": "^5.15.3",
+    "three": "^0.185.1",
     "vue": "^3.5.22"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "@types/three": "^0.185.1",
     "typescript": "^6.0.3",
     "vue-tsc": "^3.1.1"
   }
